@@ -16,13 +16,11 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 {
 	public class PersistedGrantStoreTests : IClassFixture<DatabaseProviderFixture>
 	{
-		public static readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders =
-			new TheoryData<IDataConnectionFactory>();
+		private DatabaseProviderFixture _fixture;
 
 		public PersistedGrantStoreTests(DatabaseProviderFixture fixture)
 		{
-			foreach (var context in fixture.Connections)
-				TestDatabaseProviders.Add(context);
+			_fixture = fixture;
 		}
 
 		private static PersistedGrant CreateTestObject()
@@ -39,120 +37,119 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			};
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void StoreAsync_WhenPersistedGrantStored_ExpectSuccess(IDataConnectionFactory factory)
+		[Fact]
+		public void StoreAsync_WhenPersistedGrantStored_ExpectSuccess()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			store.StoreAsync(persistedGrant).Wait();
 
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.NotNull(foundGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void GetAsync_WithKeyAndPersistedGrantExists_ExpectPersistedGrantReturned(IDataConnectionFactory factory)
+		[Fact]
+		public void GetAsync_WithKeyAndPersistedGrantExists_ExpectPersistedGrantReturned()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			var foundPersistedGrant = store.GetAsync(persistedGrant.Key).Result;
 			Assert.NotNull(foundPersistedGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void GetAsync_WithSubAndTypeAndPersistedGrantExists_ExpectPersistedGrantReturned(
-			IDataConnectionFactory factory)
+		[Fact]
+		public void GetAsync_WithSubAndTypeAndPersistedGrantExists_ExpectPersistedGrantReturned()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			var foundPersistedGrants = store.GetAllAsync(persistedGrant.SubjectId).Result.ToList();
 
 			Assert.NotNull(foundPersistedGrants);
 			Assert.NotEmpty(foundPersistedGrants);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void RemoveAsync_WhenKeyOfExistingReceived_ExpectGrantDeleted(IDataConnectionFactory factory)
+		[Fact]
+		public void RemoveAsync_WhenKeyOfExistingReceived_ExpectGrantDeleted()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			store.RemoveAsync(persistedGrant.Key).Wait();
 
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.Null(foundGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void RemoveAsync_WhenSubIdAndClientIdOfExistingReceived_ExpectGrantDeleted(IDataConnectionFactory factory)
+		[Fact]
+		public void RemoveAsync_WhenSubIdAndClientIdOfExistingReceived_ExpectGrantDeleted()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId).Wait();
 
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.Null(foundGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void RemoveAsync_WhenSubIdClientIdAndTypeOfExistingReceived_ExpectGrantDeleted(IDataConnectionFactory factory)
+		[Fact]
+		public void RemoveAsync_WhenSubIdClientIdAndTypeOfExistingReceived_ExpectGrantDeleted()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			store.RemoveAllAsync(persistedGrant.SubjectId, persistedGrant.ClientId, persistedGrant.Type).Wait();
 
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.Null(foundGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void Store_should_create_new_record_if_key_does_not_exist(IDataConnectionFactory factory)
+		[Fact]
+		public void Store_should_create_new_record_if_key_does_not_exist()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.Null(foundGrant);
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			store.StoreAsync(persistedGrant).Wait();
 
 			foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.NotNull(foundGrant);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void Store_should_update_record_if_key_already_exists(IDataConnectionFactory factory)
+		[Fact]
+		public void Store_should_update_record_if_key_already_exists()
 		{
 			var persistedGrant = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(persistedGrant.ToEntity());
 
 			var newDate = persistedGrant.Expiration.AddHours(1);
 
-			var store = new PersistedGrantStore(factory, FakeLogger<PersistedGrantStore>.Create());
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
 			persistedGrant.Expiration = newDate;
 			store.StoreAsync(persistedGrant).Wait();
 

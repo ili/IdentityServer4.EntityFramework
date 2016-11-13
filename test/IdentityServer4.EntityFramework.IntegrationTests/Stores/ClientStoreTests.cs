@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Linq;
 using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.EntityFramework.Stores;
@@ -14,28 +15,29 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 {
 	public class ClientStoreTests : IClassFixture<DatabaseProviderFixture>
 	{
-		public static readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders =
-			new TheoryData<IDataConnectionFactory>();
+		private DatabaseProviderFixture _fixture;
 
 		public ClientStoreTests(DatabaseProviderFixture fixture)
 		{
-			foreach (var context in fixture.Connections)
-				TestDatabaseProviders.Add(context);
+			_fixture = fixture;
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured(IDataConnectionFactory options)
+		[Fact]
+		public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured()
 		{
-			var db = options.GetContext();
+			var db = _fixture.Factory.GetContext();
 			var testClient = new Client
 			{
 				ClientId = Guid.NewGuid().ToString(),
-				ClientName = "Test Client"
-			};
+				ClientName = "Test Client",
+			}.ToEntity();
 
-			db.Insert(testClient.ToEntity());
+			var id = Convert.ToInt32(db.InsertWithIdentity(testClient));
+			var agt = testClient.AllowedGrantTypes.First();
+			agt.ClientId = id;
+			db.Insert(agt);
 
-			var store = new ClientStore(options, FakeLogger<ClientStore>.Create());
+			var store = new ClientStore(_fixture.Factory, FakeLogger<ClientStore>.Create());
 			var client = store.FindClientByIdAsync(testClient.ClientId).Result;
 
 			Assert.NotNull(client);

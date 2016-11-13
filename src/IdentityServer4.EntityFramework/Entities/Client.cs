@@ -17,26 +17,26 @@ namespace IdentityServer4.EntityFramework.Entities
         public string ProtocolType { get; set; } = ProtocolTypes.OpenIdConnect;
         public string ClientName { get; set; }
         public bool Enabled { get; set; } = true;
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientSecret.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientSecret.ClientId))]
         public List<ClientSecret> ClientSecrets { get; set; }
         public bool RequireClientSecret { get; set; } = true;
         public string ClientUri { get; set; }
         public string LogoUri { get; set; }
         public bool RequireConsent { get; set; } = true;
         public bool AllowRememberConsent { get; set; } = true;
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientGrantType.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientGrantType.ClientId))]
         public List<ClientGrantType> AllowedGrantTypes { get; set; }
         public bool RequirePkce { get; set; }
         public bool AllowPlainTextPkce { get; set; }
         public bool AllowAccessTokensViaBrowser { get; set; }
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientRedirectUri.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientRedirectUri.ClientId))]
         public List<ClientRedirectUri> RedirectUris { get; set; }
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientPostLogoutRedirectUri.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientPostLogoutRedirectUri.ClientId))]
         public List<ClientPostLogoutRedirectUri> PostLogoutRedirectUris { get; set; }
         public string LogoutUri { get; set; }
         public bool LogoutSessionRequired { get; set; } = true;
         public bool AllowAccessToAllScopes { get; set; }
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientScope.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientScope.ClientId))]
         public List<ClientScope> AllowedScopes { get; set; }
         public int IdentityTokenLifetime { get; set; } = 300;
         public int AccessTokenLifetime { get; set; } = 3600;
@@ -48,14 +48,14 @@ namespace IdentityServer4.EntityFramework.Entities
         public int RefreshTokenExpiration { get; set; } = (int)TokenExpiration.Absolute;
         public int AccessTokenType { get; set; } = (int)0; // AccessTokenType.Jwt;
         public bool EnableLocalLogin { get; set; } = true;
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientIdPRestriction.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientIdPRestriction.ClientId))]
         public List<ClientIdPRestriction> IdentityProviderRestrictions { get; set; }
         public bool IncludeJwtId { get; set; }
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientClaim.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientClaim.ClientId))]
         public List<ClientClaim> Claims { get; set; }
         public bool AlwaysSendClientClaims { get; set; }
         public bool PrefixClientClaims { get; set; } = true;
-		[Association(ThisKey = nameof(ClientId), OtherKey = nameof(ClientCorsOrigin.ClientId))]
+		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientCorsOrigin.ClientId))]
         public List<ClientCorsOrigin> AllowedCorsOrigins { get; set; }
     }
 }

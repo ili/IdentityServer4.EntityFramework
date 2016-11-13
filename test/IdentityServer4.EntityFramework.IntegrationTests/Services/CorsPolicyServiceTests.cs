@@ -15,45 +15,50 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Services
 {
 	public class CorsPolicyServiceTests : IClassFixture<DatabaseProviderFixture>
 	{
-		public readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders = new TheoryData<IDataConnectionFactory>();
+		private DatabaseProviderFixture _fixture;
 
 		public CorsPolicyServiceTests(DatabaseProviderFixture fixture)
 		{
-			foreach (var context in fixture.Connections)
-				TestDatabaseProviders.Add(context);
+			_fixture = fixture;
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void IsOriginAllowedAsync_WhenOriginIsAllowed_ExpectTrue(IDataConnectionFactory factory)
+		[Fact]
+		public void IsOriginAllowedAsync_WhenOriginIsAllowed_ExpectTrue()
 		{
 			const string testCorsOrigin = "https://identityserver.io/";
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
-			db.Insert(new Client
+			var entity = new Client
 			{
 				ClientId = Guid.NewGuid().ToString(),
 				ClientName = Guid.NewGuid().ToString(),
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
-			}.ToEntity());
+			}.ToEntity();
 
-			db.Insert(new Client
+			db.Insert(entity);
+			db.Insert(entity.AllowedCorsOrigins[0]);
+
+			var entity2 = new Client
 			{
 				ClientId = "2",
 				ClientName = "2",
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com", testCorsOrigin}
-			}.ToEntity());
+			}.ToEntity();
 
+			db.Insert(entity2);
+			db.Insert(entity2.AllowedCorsOrigins[0]);
+			db.Insert(entity2.AllowedCorsOrigins[1]);
 
-			var service = new CorsPolicyService(factory, FakeLogger<CorsPolicyService>.Create());
+			var service = new CorsPolicyService(_fixture.Factory, FakeLogger<CorsPolicyService>.Create());
 			var result = service.IsOriginAllowedAsync(testCorsOrigin).Result;
 
 			Assert.True(result);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void IsOriginAllowedAsync_WhenOriginIsNotAllowed_ExpectFalse(IDataConnectionFactory factory)
+		[Fact]
+		public void IsOriginAllowedAsync_WhenOriginIsNotAllowed_ExpectFalse()
 		{
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(new Client
 			{
@@ -62,7 +67,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Services
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
 			}.ToEntity());
 
-			var service = new CorsPolicyService(factory, FakeLogger<CorsPolicyService>.Create());
+			var service = new CorsPolicyService(_fixture.Factory, FakeLogger<CorsPolicyService>.Create());
 			var result = service.IsOriginAllowedAsync("InvalidOrigin").Result;
 
 			Assert.False(result);

@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System;
 using System.Linq;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Interfaces;
@@ -14,24 +15,23 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
 {
 	public class ClientDbContextTests : IClassFixture<DatabaseProviderFixture>
 	{
-		public readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders = new TheoryData<IDataConnectionFactory>();
+		private DatabaseProviderFixture _fixture;
 
 		public ClientDbContextTests(DatabaseProviderFixture fixture)
 		{
-			foreach (var context in fixture.Connections)
-				TestDatabaseProviders.Add(context);
+			_fixture = fixture;
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void CanAddAndDeleteClientScopes(IDataConnectionFactory factory)
+		[Fact]
+		public void CanAddAndDeleteClientScopes()
 		{
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
-			var id = (int) db.InsertWithIdentity(new Client
+			var id = Convert.ToInt32(db.InsertWithIdentity(new Client
 			{
 				ClientId = "test-client-scopes",
 				ClientName = "Test Client"
-			});
+			}));
 
 			var client = db.Clients().LoadWith(x => x.AllowedScopes).First(x => x.Id == id);
 
@@ -51,28 +51,29 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
 			Assert.Empty(client.AllowedScopes);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void CanAddAndDeleteClientRedirectUri(IDataConnectionFactory factory)
+		[Fact]
+		public void CanAddAndDeleteClientRedirectUri()
 		{
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
-			var id = (int) db.InsertWithIdentity(new Client
+			var id = Convert.ToInt32(db.InsertWithIdentity(new Client
 			{
 				ClientId = "test-client",
 				ClientName = "Test Client"
-			});
+			}));
 
 			var client = db.Clients().LoadWith(x => x.RedirectUris).First(x => x.Id == id);
 
-			client.RedirectUris.Add(new ClientRedirectUri
+			db.Insert(new ClientRedirectUri
 			{
-				RedirectUri = "https://redirect-uri-1"
+				RedirectUri = "https://redirect-uri-1",
+				ClientId = id
 			});
 
 			client = db.Clients().LoadWith(x => x.RedirectUris).First(x => x.Id == id);
 			var redirectUri = client.RedirectUris.First();
 
-			client.RedirectUris.Remove(redirectUri);
+			db.ClientRedirectUris().Where(_ => _.ClientId == id).Delete();
 
 			client = db.Clients().LoadWith(x => x.RedirectUris).First(x => x.Id == id);
 

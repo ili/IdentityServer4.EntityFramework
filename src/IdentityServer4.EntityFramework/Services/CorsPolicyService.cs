@@ -31,7 +31,7 @@ namespace IdentityServer4.EntityFramework.Services
 	        var db = _dataConnectionFactory.GetContext();
 
 	        var isAllowed = db.GetTable<ClientCorsOrigin>()
-		        .Any(_ => _.Origin.Equals(origin, StringComparison.OrdinalIgnoreCase));
+		        .Any(_ => _.Origin.Equals(origin));
 
             _logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
 

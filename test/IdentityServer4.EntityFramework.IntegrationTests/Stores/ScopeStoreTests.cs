@@ -16,13 +16,11 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 {
 	public class ScopeStoreTests : IClassFixture<DatabaseProviderFixture>
 	{
-		public static readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders =
-			new TheoryData<IDataConnectionFactory>();
+		private DatabaseProviderFixture _fixture;
 
 		public ScopeStoreTests(DatabaseProviderFixture fixture)
 		{
-			foreach (var context in fixture.Connections)
-				TestDatabaseProviders.Add(context);
+			_fixture = fixture;
 		}
 
 		private static Scope CreateTestObject()
@@ -41,18 +39,18 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			};
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void FindScopesAsync_WhenScopesExist_ExpectScopesReturned(IDataConnectionFactory factory)
+		[Fact]
+		public void FindScopesAsync_WhenScopesExist_ExpectScopesReturned()
 		{
 			var firstTestScope = CreateTestObject();
 			var secondTestScope = CreateTestObject();
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(firstTestScope.ToEntity());
 			db.Insert(secondTestScope.ToEntity());
 
 			IList<Scope> scopes;
-			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
 			scopes = store.FindScopesAsync(new List<string>
 			{
 				firstTestScope.Name,
@@ -65,16 +63,16 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			Assert.NotNull(scopes.FirstOrDefault(x => x.Name == secondTestScope.Name));
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void GetScopesAsync_WhenAllScopesRequested_ExpectAllScopes(IDataConnectionFactory factory)
+		[Fact]
+		public void GetScopesAsync_WhenAllScopesRequested_ExpectAllScopes()
 		{
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(CreateTestObject().ToEntity());
 			db.Insert(new Entities.Scope {Name = "hidden_scope_return", ShowInDiscoveryDocument = false});
 
 			IList<Scope> scopes;
-			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
 			scopes = store.GetScopesAsync(false).Result.ToList();
 
 			Assert.NotNull(scopes);
@@ -83,16 +81,16 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			Assert.True(scopes.Any(x => !x.ShowInDiscoveryDocument));
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void GetScopesAsync_WhenAllDiscoveryScopesRequested_ExpectAllDiscoveryScopes(IDataConnectionFactory factory)
+		[Fact]
+		public void GetScopesAsync_WhenAllDiscoveryScopesRequested_ExpectAllDiscoveryScopes()
 		{
-			var db = factory.GetContext();
+			var db = _fixture.Factory.GetContext();
 
 			db.Insert(CreateTestObject().ToEntity());
 			db.Insert(new Entities.Scope {Name = "hidden_scope", ShowInDiscoveryDocument = false});
 
 			IList<Scope> scopes;
-			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
 			scopes = store.GetScopesAsync().Result.ToList();
 
 			Assert.NotNull(scopes);
@@ -101,16 +99,19 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			Assert.True(scopes.All(x => x.ShowInDiscoveryDocument));
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void FindScopesAsync_WhenScopeHasSecrets_ExpectScopeAndSecretsReturned(IDataConnectionFactory factory)
+		[Fact]
+		public void FindScopesAsync_WhenScopeHasSecrets_ExpectScopeAndSecretsReturned()
 		{
-			var scope = CreateTestObject();
-			var db = factory.GetContext();
+			var scope = CreateTestObject().ToEntity();
+			var db = _fixture.Factory.GetContext();
 
-			db.Insert(scope.ToEntity());
+			var id = Convert.ToInt32(db.InsertWithIdentity(scope));
+			var secret = scope.ScopeSecrets[0];
+			secret.ScopeId = id;
+			db.Insert(secret);
 
 			IList<Scope> scopes;
-			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
 			scopes = store.FindScopesAsync(new List<string>
 			{
 				scope.Name
@@ -123,16 +124,19 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			Assert.NotEmpty(foundScope.ScopeSecrets);
 		}
 
-		[Theory, MemberData(nameof(TestDatabaseProviders))]
-		public void FindScopesAsync_WhenScopeHasClaims_ExpectScopeAndClaimsReturned(IDataConnectionFactory factory)
+		[Fact]
+		public void FindScopesAsync_WhenScopeHasClaims_ExpectScopeAndClaimsReturned()
 		{
-			var scope = CreateTestObject();
-			var db = factory.GetContext();
+			var scope = CreateTestObject().ToEntity();
+			var db = _fixture.Factory.GetContext();
 
-			db.Insert(scope.ToEntity());
+			var id = Convert.ToInt32(db.InsertWithIdentity(scope));
+			var claim = scope.Claims.First();
+			claim.ScopeId = id;
+			db.Insert(claim);
 
 			IList<Scope> scopes;
-			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
 			scopes = store.FindScopesAsync(new List<string>
 			{
 				scope.Name
