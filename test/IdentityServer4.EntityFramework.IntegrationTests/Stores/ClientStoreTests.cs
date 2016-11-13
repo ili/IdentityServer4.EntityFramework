@@ -2,56 +2,43 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using System.Linq;
-using IdentityServer4.EntityFramework.DbContexts;
+using System;
+using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.EntityFramework.Stores;
 using IdentityServer4.Models;
-using Microsoft.EntityFrameworkCore;
+using LinqToDB;
 using Xunit;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 {
-    public class ClientStoreTests : IClassFixture<DatabaseProviderFixture<ConfigurationDbContext>>
-    {
-        private static readonly ConfigurationStoreOptions StoreOptions = new ConfigurationStoreOptions();
-        public static readonly TheoryData<DbContextOptions<ConfigurationDbContext>> TestDatabaseProviders = new TheoryData<DbContextOptions<ConfigurationDbContext>>
-        {
-            DatabaseProviderBuilder.BuildInMemory<ConfigurationDbContext>(nameof(ClientStoreTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlite<ConfigurationDbContext>(nameof(ClientStoreTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlServer<ConfigurationDbContext>(nameof(ClientStoreTests), StoreOptions)
-        };
+	public class ClientStoreTests : IClassFixture<DatabaseProviderFixture>
+	{
+		public static readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders =
+			new TheoryData<IDataConnectionFactory>();
 
-        public ClientStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture)
-        {
-            fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<ConfigurationDbContext>)y)).ToList();
-            fixture.StoreOptions = StoreOptions;
-        }
+		public ClientStoreTests(DatabaseProviderFixture fixture)
+		{
+			foreach (var context in fixture.Connections)
+				TestDatabaseProviders.Add(context);
+		}
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured(DbContextOptions<ConfigurationDbContext> options)
-        {
-            var testClient = new Client
-            {
-                ClientId = "test_client",
-                ClientName = "Test Client"
-            };
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured(IDataConnectionFactory options)
+		{
+			var db = options.GetContext();
+			var testClient = new Client
+			{
+				ClientId = Guid.NewGuid().ToString(),
+				ClientName = "Test Client"
+			};
 
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Clients.Add(testClient.ToEntity());
-                context.SaveChanges();
-            }
+			db.Insert(testClient.ToEntity());
 
-            Client client;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ClientStore(context, FakeLogger<ClientStore>.Create());
-                client = store.FindClientByIdAsync(testClient.ClientId).Result;
-            }
+			var store = new ClientStore(options, FakeLogger<ClientStore>.Create());
+			var client = store.FindClientByIdAsync(testClient.ClientId).Result;
 
-            Assert.NotNull(client);
-        }
-    }
+			Assert.NotNull(client);
+		}
+	}
 }

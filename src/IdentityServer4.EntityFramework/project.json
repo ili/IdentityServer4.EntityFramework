@@ -11,14 +11,13 @@
   },
 
   "dependencies": {
-    "IdentityServer4":  "1.0.0-rc3",
-    "Microsoft.EntityFrameworkCore": "1.0.1",
-    "Microsoft.EntityFrameworkCore.Relational": "1.0.1",
+			"IdentityServer4": "1.0.0-rc3",
+			"linq2db.core": "1.7.5-*",
     "AutoMapper": "5.1.1"
   },
 
   "frameworks": {
-    "netstandard1.4": {},
+    "netstandard1.6": {},
     "net452": {}
   }
 }

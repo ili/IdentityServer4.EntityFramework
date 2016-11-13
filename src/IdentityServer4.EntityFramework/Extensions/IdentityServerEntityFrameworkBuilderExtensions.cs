@@ -2,30 +2,28 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Services;
 using IdentityServer4.EntityFramework.Stores;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using Microsoft.EntityFrameworkCore;
 using System;
 using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.EntityFramework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IdentityServerEntityFrameworkBuilderExtensions
     {
         public static IIdentityServerBuilder AddConfigurationStore(
             this IIdentityServerBuilder builder, 
-            Action<DbContextOptionsBuilder> dbContextOptionsAction = null,
+			IDataConnectionFactory dataConnectionFactory,
             Action<ConfigurationStoreOptions> storeOptionsAction = null)
         {
-            builder.Services.AddDbContext<ConfigurationDbContext>(dbContextOptionsAction);
-            builder.Services.AddScoped<IConfigurationDbContext, ConfigurationDbContext>();
+            builder.Services.AddSingleton(dataConnectionFactory);
 
             builder.Services.AddTransient<IClientStore, ClientStore>();
             builder.Services.AddTransient<IScopeStore, ScopeStore>();
@@ -58,14 +56,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static IIdentityServerBuilder AddOperationalStore(
             this IIdentityServerBuilder builder,
-            Action<DbContextOptionsBuilder> dbContextOptionsAction = null,
-            Action<OperationalStoreOptions> storeOptionsAction = null,
+			IDataConnectionFactory dataConnectionFactory,
+			Action<OperationalStoreOptions> storeOptionsAction = null,
             Action<TokenCleanupOptions> tokenCleanUpOptions = null)
         {
-            builder.Services.AddDbContext<PersistedGrantDbContext>(dbContextOptionsAction);
-            builder.Services.AddScoped<IPersistedGrantDbContext, PersistedGrantDbContext>();
+			builder.Services.AddSingleton(dataConnectionFactory);
 
-            builder.Services.AddTransient<IPersistedGrantStore, PersistedGrantStore>();
+			builder.Services.AddTransient<IPersistedGrantStore, PersistedGrantStore>();
 
             var storeOptions = new OperationalStoreOptions();
             storeOptionsAction?.Invoke(storeOptions);

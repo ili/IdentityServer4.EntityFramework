@@ -3,11 +3,13 @@
 
 
 using System;
+using LinqToDB.Mapping;
 
 namespace IdentityServer4.EntityFramework.Entities
 {
     public class PersistedGrant
     {
+		[PrimaryKey, Identity]
         public string Key { get; set; }
         public string Type { get; set; }
         public string SubjectId { get; set; }

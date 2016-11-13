@@ -5,7 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using IdentityServer4.EntityFramework.Interfaces;
+using LinqToDB;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests
 {
@@ -13,20 +14,25 @@ namespace IdentityServer4.EntityFramework.IntegrationTests
     /// xUnit ClassFixture for creating and deleting integration test databases.
     /// </summary>
     /// <typeparam name="T">DbContext of Type T</typeparam>
-    public class DatabaseProviderFixture<T> : IDisposable where T : DbContext
+    public class DatabaseProviderFixture : IDisposable 
     {
-        public object StoreOptions;
-        public List<DbContextOptions<T>> Options;
+	    public IEnumerable<IDataConnectionFactory> Connections
+	    {
+		    get
+		    {
+			    yield break;
+		    }
+	    }
         
         public void Dispose()
         {
-            foreach (var option in Options.ToList())
-            {
-                using (var context = (T)Activator.CreateInstance(typeof(T), option, StoreOptions))
-                {
-                    context.Database.EnsureDeleted();
-                }
-            }
+            //foreach (var option in Options.ToList())
+            //{
+            //    using (var context = (T)Activator.CreateInstance(typeof(T), option, StoreOptions))
+            //    {
+            //        context.Database.EnsureDeleted();
+            //    }
+            //}
         }
     }
 }

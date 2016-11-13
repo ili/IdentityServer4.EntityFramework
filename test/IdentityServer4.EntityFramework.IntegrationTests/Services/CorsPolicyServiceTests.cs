@@ -4,87 +4,68 @@
 
 using System;
 using System.Collections.Generic;
-using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.EntityFramework.Services;
 using IdentityServer4.Models;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
-using System.Linq;
-using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.EntityFramework.Interfaces;
+using LinqToDB;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests.Services
 {
-    public class CorsPolicyServiceTests : IClassFixture<DatabaseProviderFixture<ConfigurationDbContext>>
-    {
-        private static readonly ConfigurationStoreOptions StoreOptions = new ConfigurationStoreOptions();
-        public static readonly TheoryData<DbContextOptions<ConfigurationDbContext>> TestDatabaseProviders = new TheoryData<DbContextOptions<ConfigurationDbContext>>
-        {
-            DatabaseProviderBuilder.BuildInMemory<ConfigurationDbContext>(nameof(CorsPolicyServiceTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlite<ConfigurationDbContext>(nameof(CorsPolicyServiceTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlServer<ConfigurationDbContext>(nameof(CorsPolicyServiceTests), StoreOptions)
-        };
+	public class CorsPolicyServiceTests : IClassFixture<DatabaseProviderFixture>
+	{
+		public readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders = new TheoryData<IDataConnectionFactory>();
 
-        public CorsPolicyServiceTests(DatabaseProviderFixture<ConfigurationDbContext> fixture)
-        {
-            fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<ConfigurationDbContext>)y)).ToList();
-            fixture.StoreOptions = StoreOptions;
-        }
+		public CorsPolicyServiceTests(DatabaseProviderFixture fixture)
+		{
+			foreach (var context in fixture.Connections)
+				TestDatabaseProviders.Add(context);
+		}
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void IsOriginAllowedAsync_WhenOriginIsAllowed_ExpectTrue(DbContextOptions<ConfigurationDbContext> options)
-        {
-            const string testCorsOrigin = "https://identityserver.io/";
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void IsOriginAllowedAsync_WhenOriginIsAllowed_ExpectTrue(IDataConnectionFactory factory)
+		{
+			const string testCorsOrigin = "https://identityserver.io/";
+			var db = factory.GetContext();
 
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Clients.Add(new Client
-                {
-                    ClientId = Guid.NewGuid().ToString(),
-                    ClientName = Guid.NewGuid().ToString(),
-                    AllowedCorsOrigins = new List<string> { "https://www.identityserver.com" }
-                }.ToEntity());
-                context.Clients.Add(new Client
-                {
-                    ClientId = "2",
-                    ClientName = "2",
-                    AllowedCorsOrigins = new List<string> { "https://www.identityserver.com", testCorsOrigin }
-                }.ToEntity());
-                context.SaveChanges();
-            }
+			db.Insert(new Client
+			{
+				ClientId = Guid.NewGuid().ToString(),
+				ClientName = Guid.NewGuid().ToString(),
+				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
+			}.ToEntity());
 
-            bool result;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create());
-                result = service.IsOriginAllowedAsync(testCorsOrigin).Result;
-            }
+			db.Insert(new Client
+			{
+				ClientId = "2",
+				ClientName = "2",
+				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com", testCorsOrigin}
+			}.ToEntity());
 
-            Assert.True(result);
-        }
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void IsOriginAllowedAsync_WhenOriginIsNotAllowed_ExpectFalse(DbContextOptions<ConfigurationDbContext> options)
-        {
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Clients.Add(new Client
-                {
-                    ClientId = Guid.NewGuid().ToString(),
-                    ClientName = Guid.NewGuid().ToString(),
-                    AllowedCorsOrigins = new List<string> { "https://www.identityserver.com" }
-                }.ToEntity());
-                context.SaveChanges();
-            }
+			var service = new CorsPolicyService(factory, FakeLogger<CorsPolicyService>.Create());
+			var result = service.IsOriginAllowedAsync(testCorsOrigin).Result;
 
-            bool result;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var service = new CorsPolicyService(context, FakeLogger<CorsPolicyService>.Create());
-                result = service.IsOriginAllowedAsync("InvalidOrigin").Result;
-            }
+			Assert.True(result);
+		}
 
-            Assert.False(result);
-        }
-    }
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void IsOriginAllowedAsync_WhenOriginIsNotAllowed_ExpectFalse(IDataConnectionFactory factory)
+		{
+			var db = factory.GetContext();
+
+			db.Insert(new Client
+			{
+				ClientId = Guid.NewGuid().ToString(),
+				ClientName = Guid.NewGuid().ToString(),
+				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
+			}.ToEntity());
+
+			var service = new CorsPolicyService(factory, FakeLogger<CorsPolicyService>.Create());
+			var result = service.IsOriginAllowedAsync("InvalidOrigin").Result;
+
+			Assert.False(result);
+		}
+	}
 }

@@ -5,178 +5,144 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Options;
 using IdentityServer4.EntityFramework.Stores;
 using IdentityServer4.Models;
-using Microsoft.EntityFrameworkCore;
+using LinqToDB;
 using Xunit;
 
 namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 {
-    public class ScopeStoreTests : IClassFixture<DatabaseProviderFixture<ConfigurationDbContext>>
-    {
-        private static readonly ConfigurationStoreOptions StoreOptions = new ConfigurationStoreOptions();
-        public static readonly TheoryData<DbContextOptions<ConfigurationDbContext>> TestDatabaseProviders = new TheoryData<DbContextOptions<ConfigurationDbContext>>
-        {
-            DatabaseProviderBuilder.BuildInMemory<ConfigurationDbContext>(nameof(ScopeStoreTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlite<ConfigurationDbContext>(nameof(ScopeStoreTests), StoreOptions),
-            DatabaseProviderBuilder.BuildSqlServer<ConfigurationDbContext>(nameof(ScopeStoreTests), StoreOptions)
-        };
-        
-        public ScopeStoreTests(DatabaseProviderFixture<ConfigurationDbContext> fixture)
-        {
-            fixture.Options = TestDatabaseProviders.SelectMany(x => x.Select(y => (DbContextOptions<ConfigurationDbContext>)y)).ToList();
-            fixture.StoreOptions = StoreOptions;
-        }
+	public class ScopeStoreTests : IClassFixture<DatabaseProviderFixture>
+	{
+		public static readonly TheoryData<IDataConnectionFactory> TestDatabaseProviders =
+			new TheoryData<IDataConnectionFactory>();
 
-        private static Scope CreateTestObject()
-        {
-            return new Scope
-            {
-                Name = Guid.NewGuid().ToString(),
-                Type = ScopeType.Identity,
-                ShowInDiscoveryDocument = true,
-                ScopeSecrets = new List<Secret> {new Secret("secret".Sha256())},
-                Claims = new List<ScopeClaim>
-                {
-                    new ScopeClaim("name"),
-                    new ScopeClaim("role")
-                }
-            };
-        }
+		public ScopeStoreTests(DatabaseProviderFixture fixture)
+		{
+			foreach (var context in fixture.Connections)
+				TestDatabaseProviders.Add(context);
+		}
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindScopesAsync_WhenScopesExist_ExpectScopesReturned(DbContextOptions<ConfigurationDbContext> options)
-        {
-            var firstTestScope = CreateTestObject();
-            var secondTestScope = CreateTestObject();
+		private static Scope CreateTestObject()
+		{
+			return new Scope
+			{
+				Name = Guid.NewGuid().ToString(),
+				Type = ScopeType.Identity,
+				ShowInDiscoveryDocument = true,
+				ScopeSecrets = new List<Secret> {new Secret("secret".Sha256())},
+				Claims = new List<ScopeClaim>
+				{
+					new ScopeClaim("name"),
+					new ScopeClaim("role")
+				}
+			};
+		}
 
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Scopes.Add(firstTestScope.ToEntity());
-                context.Scopes.Add(secondTestScope.ToEntity());
-                context.SaveChanges();
-            }
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void FindScopesAsync_WhenScopesExist_ExpectScopesReturned(IDataConnectionFactory factory)
+		{
+			var firstTestScope = CreateTestObject();
+			var secondTestScope = CreateTestObject();
+			var db = factory.GetContext();
 
-            IList<Scope> scopes;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ScopeStore(context, FakeLogger<ScopeStore>.Create());
-                scopes = store.FindScopesAsync(new List<string>
-                {
-                    firstTestScope.Name,
-                    secondTestScope.Name
-                }).Result.ToList();
-            }
+			db.Insert(firstTestScope.ToEntity());
+			db.Insert(secondTestScope.ToEntity());
 
-            Assert.NotNull(scopes);
-            Assert.NotEmpty(scopes);
-            Assert.NotNull(scopes.FirstOrDefault(x => x.Name == firstTestScope.Name));
-            Assert.NotNull(scopes.FirstOrDefault(x => x.Name == secondTestScope.Name));
-        }
+			IList<Scope> scopes;
+			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			scopes = store.FindScopesAsync(new List<string>
+			{
+				firstTestScope.Name,
+				secondTestScope.Name
+			}).Result.ToList();
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void GetScopesAsync_WhenAllScopesRequested_ExpectAllScopes(DbContextOptions<ConfigurationDbContext> options)
-        {
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Scopes.Add(CreateTestObject().ToEntity());
-                context.Scopes.Add(new Entities.Scope { Name = "hidden_scope_return", ShowInDiscoveryDocument = false });
-                context.SaveChanges();
-            }
+			Assert.NotNull(scopes);
+			Assert.NotEmpty(scopes);
+			Assert.NotNull(scopes.FirstOrDefault(x => x.Name == firstTestScope.Name));
+			Assert.NotNull(scopes.FirstOrDefault(x => x.Name == secondTestScope.Name));
+		}
 
-            IList<Scope> scopes;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ScopeStore(context, FakeLogger<ScopeStore>.Create());
-                scopes = store.GetScopesAsync(false).Result.ToList();
-            }
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void GetScopesAsync_WhenAllScopesRequested_ExpectAllScopes(IDataConnectionFactory factory)
+		{
+			var db = factory.GetContext();
 
-            Assert.NotNull(scopes);
-            Assert.NotEmpty(scopes);
+			db.Insert(CreateTestObject().ToEntity());
+			db.Insert(new Entities.Scope {Name = "hidden_scope_return", ShowInDiscoveryDocument = false});
 
-            Assert.True(scopes.Any(x => !x.ShowInDiscoveryDocument));
-        }
+			IList<Scope> scopes;
+			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			scopes = store.GetScopesAsync(false).Result.ToList();
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void GetScopesAsync_WhenAllDiscoveryScopesRequested_ExpectAllDiscoveryScopes(DbContextOptions<ConfigurationDbContext> options)
-        {
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Scopes.Add(CreateTestObject().ToEntity());
-                context.Scopes.Add(new Entities.Scope { Name = "hidden_scope", ShowInDiscoveryDocument = false });
-                context.SaveChanges();
-            }
+			Assert.NotNull(scopes);
+			Assert.NotEmpty(scopes);
 
-            IList<Scope> scopes;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ScopeStore(context, FakeLogger<ScopeStore>.Create());
-                scopes = store.GetScopesAsync().Result.ToList();
-            }
+			Assert.True(scopes.Any(x => !x.ShowInDiscoveryDocument));
+		}
 
-            Assert.NotNull(scopes);
-            Assert.NotEmpty(scopes);
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void GetScopesAsync_WhenAllDiscoveryScopesRequested_ExpectAllDiscoveryScopes(IDataConnectionFactory factory)
+		{
+			var db = factory.GetContext();
 
-            Assert.True(scopes.All(x => x.ShowInDiscoveryDocument));
-        }
+			db.Insert(CreateTestObject().ToEntity());
+			db.Insert(new Entities.Scope {Name = "hidden_scope", ShowInDiscoveryDocument = false});
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindScopesAsync_WhenScopeHasSecrets_ExpectScopeAndSecretsReturned(DbContextOptions<ConfigurationDbContext> options)
-        {
-            var scope = CreateTestObject();
+			IList<Scope> scopes;
+			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			scopes = store.GetScopesAsync().Result.ToList();
 
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Scopes.Add(scope.ToEntity());
-                context.SaveChanges();
-            }
+			Assert.NotNull(scopes);
+			Assert.NotEmpty(scopes);
 
-            IList<Scope> scopes;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ScopeStore(context, FakeLogger<ScopeStore>.Create());
-                scopes = store.FindScopesAsync(new List<string>
-                {
-                    scope.Name
-                }).Result.ToList();
-            }
+			Assert.True(scopes.All(x => x.ShowInDiscoveryDocument));
+		}
 
-            Assert.NotNull(scopes);
-            var foundScope = scopes.Single();
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void FindScopesAsync_WhenScopeHasSecrets_ExpectScopeAndSecretsReturned(IDataConnectionFactory factory)
+		{
+			var scope = CreateTestObject();
+			var db = factory.GetContext();
 
-            Assert.NotNull(foundScope.ScopeSecrets);
-            Assert.NotEmpty(foundScope.ScopeSecrets);
-        }
+			db.Insert(scope.ToEntity());
 
-        [Theory, MemberData(nameof(TestDatabaseProviders))]
-        public void FindScopesAsync_WhenScopeHasClaims_ExpectScopeAndClaimsReturned(DbContextOptions<ConfigurationDbContext> options)
-        {
-            var scope = CreateTestObject();
+			IList<Scope> scopes;
+			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			scopes = store.FindScopesAsync(new List<string>
+			{
+				scope.Name
+			}).Result.ToList();
 
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                context.Scopes.Add(scope.ToEntity());
-                context.SaveChanges();
-            }
+			Assert.NotNull(scopes);
+			var foundScope = scopes.Single();
 
-            IList<Scope> scopes;
-            using (var context = new ConfigurationDbContext(options, StoreOptions))
-            {
-                var store = new ScopeStore(context, FakeLogger<ScopeStore>.Create());
-                scopes = store.FindScopesAsync(new List<string>
-                {
-                    scope.Name
-                }).Result.ToList();
-            }
+			Assert.NotNull(foundScope.ScopeSecrets);
+			Assert.NotEmpty(foundScope.ScopeSecrets);
+		}
 
-            Assert.NotNull(scopes);
-            var foundScope = scopes.Single();
+		[Theory, MemberData(nameof(TestDatabaseProviders))]
+		public void FindScopesAsync_WhenScopeHasClaims_ExpectScopeAndClaimsReturned(IDataConnectionFactory factory)
+		{
+			var scope = CreateTestObject();
+			var db = factory.GetContext();
 
-            Assert.NotNull(foundScope.Claims);
-            Assert.NotEmpty(foundScope.Claims);
-        }
-    }
+			db.Insert(scope.ToEntity());
+
+			IList<Scope> scopes;
+			var store = new ScopeStore(factory, FakeLogger<ScopeStore>.Create());
+			scopes = store.FindScopesAsync(new List<string>
+			{
+				scope.Name
+			}).Result.ToList();
+
+			Assert.NotNull(scopes);
+			var foundScope = scopes.Single();
+
+			Assert.NotNull(foundScope.Claims);
+			Assert.NotEmpty(foundScope.Claims);
+		}
+	}
 }

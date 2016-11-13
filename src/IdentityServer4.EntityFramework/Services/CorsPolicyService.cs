@@ -6,31 +6,32 @@ using System;
 using System.Threading.Tasks;
 using IdentityServer4.Services;
 using System.Linq;
+using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Interfaces;
+using LinqToDB;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.EntityFramework.Services
 {
     public class CorsPolicyService : ICorsPolicyService
     {
-        private readonly IConfigurationDbContext _context;
+        private readonly IDataConnectionFactory _dataConnectionFactory;
         private readonly ILogger<CorsPolicyService> _logger;
 
-        public CorsPolicyService(IConfigurationDbContext context, ILogger<CorsPolicyService> logger)
+        public CorsPolicyService(IDataConnectionFactory dataConnectionFactory, ILogger<CorsPolicyService> logger)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (dataConnectionFactory == null) throw new ArgumentNullException(nameof(dataConnectionFactory));
 
-            _context = context;
+            _dataConnectionFactory = dataConnectionFactory;
             _logger = logger;
         }
 
         public Task<bool> IsOriginAllowedAsync(string origin)
         {
-            var origins = _context.Clients.SelectMany(x => x.AllowedCorsOrigins.Select(y => y.Origin)).ToList();
+	        var db = _dataConnectionFactory.GetContext();
 
-            var distinctOrigins = origins.Where(x => x != null).Distinct();
-
-            var isAllowed = distinctOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+	        var isAllowed = db.GetTable<ClientCorsOrigin>()
+		        .Any(_ => _.Origin.Equals(origin, StringComparison.OrdinalIgnoreCase));
 
             _logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
 

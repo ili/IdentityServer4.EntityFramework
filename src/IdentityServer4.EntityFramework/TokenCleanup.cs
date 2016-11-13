@@ -6,8 +6,9 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Options;
+using LinqToDB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -90,17 +91,15 @@ namespace IdentityServer4.EntityFramework
                 
                 using (var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
                 {
-                    using (var context = serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>())
+	                var context = serviceScope.ServiceProvider.GetService<IDataConnectionFactory>();
+
                     {
-                        var expired = context.PersistedGrants.Where(x => x.Expiration < DateTimeOffset.UtcNow).ToArray();
+                        var expired = context.GetContext()
+							.GetTable<Entities.PersistedGrant>()
+							.Where(x => x.Expiration < DateTimeOffset.UtcNow)
+							.Delete();
 
-                        _logger.LogDebug("Clearing {tokenCount} tokens", expired.Length);
-
-                        if (expired.Length > 0)
-                        {
-                            context.PersistedGrants.RemoveRange(expired);
-                            context.SaveChanges();
-                        }
+                        _logger.LogDebug("Clearing {tokenCount} tokens", expired);
                     }
                 }
             }

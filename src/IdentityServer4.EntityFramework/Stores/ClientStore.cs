@@ -9,36 +9,37 @@ using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
-using Microsoft.EntityFrameworkCore;
+using LinqToDB;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.EntityFramework.Stores
 {
     public class ClientStore : IClientStore
     {
-        private readonly IConfigurationDbContext _context;
+        private readonly IDataConnectionFactory _dataConnectionFactory;
         private readonly ILogger<ClientStore> _logger;
 
-        public ClientStore(IConfigurationDbContext context, ILogger<ClientStore> logger)
+        public ClientStore(IDataConnectionFactory dataConnectionFactory, ILogger<ClientStore> logger)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (dataConnectionFactory == null) throw new ArgumentNullException(nameof(dataConnectionFactory));
 
-            _context = context;
+            _dataConnectionFactory = dataConnectionFactory;
             _logger = logger;
         }
 
         public Task<Client> FindClientByIdAsync(string clientId)
         {
-            var client = _context.Clients
-                .Include(x => x.AllowedGrantTypes)
-                .Include(x => x.RedirectUris)
-                .Include(x => x.PostLogoutRedirectUris)
-                .Include(x => x.AllowedScopes)
-                .Include(x => x.ClientSecrets)
-                .Include(x => x.Claims)
-                .Include(x => x.IdentityProviderRestrictions)
-                .Include(x => x.AllowedCorsOrigins)
+            var client = _dataConnectionFactory.GetContext().GetTable<Entities.Client>()
+                .LoadWith(x => x.AllowedGrantTypes)
+                .LoadWith(x => x.RedirectUris)
+                .LoadWith(x => x.PostLogoutRedirectUris)
+                .LoadWith(x => x.AllowedScopes)
+                .LoadWith(x => x.ClientSecrets)
+                .LoadWith(x => x.Claims)
+                .LoadWith(x => x.IdentityProviderRestrictions)
+                .LoadWith(x => x.AllowedCorsOrigins)
                 .FirstOrDefault(x => x.ClientId == clientId);
+
             var model = client?.ToModel();
 
             _logger.LogDebug("{clientId} found in database: {clientIdFound}", clientId, model != null);

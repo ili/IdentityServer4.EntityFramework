@@ -10,62 +10,79 @@ using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
-using Microsoft.EntityFrameworkCore;
+using LinqToDB;
 using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.EntityFramework.Stores
 {
-    public class ScopeStore : IScopeStore
-    {
-        private readonly IConfigurationDbContext _context;
-        private readonly ILogger<ScopeStore> _logger;
+	public class ScopeStore : IScopeStore
+	{
+		private readonly IDataConnectionFactory _dataConnectionFactory;
+		private readonly ILogger<ScopeStore> _logger;
 
-        public ScopeStore(IConfigurationDbContext context, ILogger<ScopeStore> logger)
-        {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+		public ScopeStore(IDataConnectionFactory dataConnectionFactory, ILogger<ScopeStore> logger)
+		{
+			if (dataConnectionFactory == null) throw new ArgumentNullException(nameof(dataConnectionFactory));
 
-            _context = context;
-            _logger = logger;
-        }
+			_dataConnectionFactory = dataConnectionFactory;
+			_logger = logger;
+		}
 
-        public Task<IEnumerable<Scope>> FindScopesAsync(IEnumerable<string> scopeNames)
-        {
-            IQueryable<Entities.Scope> scopes = _context.Scopes
-                .Include(x => x.Claims)
-                .Include(x => x.ScopeSecrets);
+		public Task<IEnumerable<Scope>> FindScopesAsync(IEnumerable<string> scopeNames)
+		{
+			var oldValue = LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
 
-            if (scopeNames != null && scopeNames.Any())
-            {
-                scopes = scopes.Where(x => scopeNames.Contains(x.Name));
-            }
+			try
+			{
+				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
 
-            var foundScopes = scopes.ToList();
+				var scopes = _dataConnectionFactory.GetContext()
+					.GetTable<Entities.Scope>()
+					.LoadWith(x => x.Claims)
+					.LoadWith(x => x.ScopeSecrets)
+					.Where(x => scopeNames.Contains(x.Name));
 
-            _logger.LogDebug("Found {scopes} scopes in database", foundScopes.Select(x => x.Name));
+				var foundScopes = scopes.ToList();
 
-            var model = foundScopes.Select(x => x.ToModel());
+				_logger.LogDebug("Found {scopes} scopes in database", foundScopes.Select(x => x.Name));
 
-            return Task.FromResult(model);
-        }
+				var model = foundScopes.Select(x => x.ToModel());
 
-        public Task<IEnumerable<Scope>> GetScopesAsync(bool publicOnly = true)
-        {
-            IQueryable<Entities.Scope> scopes = _context.Scopes
-                .Include(x => x.Claims)
-                .Include(x => x.ScopeSecrets);
+				return Task.FromResult(model);
+			}
+			finally
+			{
+				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
+			}
+		}
 
-            if (publicOnly)
-            {
-                scopes = scopes.Where(x => x.ShowInDiscoveryDocument);
-            }
+		public Task<IEnumerable<Scope>> GetScopesAsync(bool publicOnly = true)
+		{
+			var oldValue = LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
 
-            var foundScopes = scopes.ToList();
+			try
+			{
+				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
+				IQueryable<Entities.Scope> scopes = _dataConnectionFactory.GetContext()
+					.GetTable<Entities.Scope>()
+					.LoadWith(x => x.Claims)
+					.LoadWith(x => x.ScopeSecrets);
 
-            _logger.LogDebug("Found {scopes} scopes in database", foundScopes.Select(x => x.Name));
+				if (publicOnly)
+					scopes = scopes.Where(x => x.ShowInDiscoveryDocument);
 
-            var model = foundScopes.Select(x => x.ToModel());
+				var foundScopes = scopes.ToList();
 
-            return Task.FromResult(model);
-        }
-    }
+				_logger.LogDebug("Found {scopes} scopes in database", foundScopes.Select(x => x.Name));
+
+				var model = foundScopes.Select(x => x.ToModel());
+
+				return Task.FromResult(model);
+			}
+			finally
+			{
+				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
+			}
+		}
+	}
 }
