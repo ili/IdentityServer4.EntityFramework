@@ -11,11 +11,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("IdentityServer4.EntityFramework")]
+[assembly: AssemblyProduct("IdentityServer4.LinqToDB")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: InternalsVisibleTo("IdentityServer4.EntityFramework.UnitTests")]
-[assembly: InternalsVisibleTo("IdentityServer4.EntityFramework.IntegrationTests")]
+[assembly: InternalsVisibleTo("IdentityServer4.LinqToDB.UnitTests")]
+[assembly: InternalsVisibleTo("IdentityServer4.LinqToDB.IntegrationTests")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from

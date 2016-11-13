@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-rc3-*",
-  "authors": [ "Brock Allen", "Dominick Baier", "Scott Brady" ],
-  "description": "EntityFramework persistence layer for IdentityServer4",
+  "authors": [ "Brock Allen", "Dominick Baier", "Scott Brady", "Ilya Chudin" ],
+  "description": "LinqToDB persistence layer for IdentityServer4",
 
   "packOptions": {
     "tags": [ "OAuth2", "OAuth 2.0", "OpenID Connect", "Security", "Identity", "IdentityServer", "EntityFramework" ],
