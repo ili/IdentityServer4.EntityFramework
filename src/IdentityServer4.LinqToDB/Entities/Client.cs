@@ -2,19 +2,18 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer4.Models;
 using System.Collections.Generic;
+using IdentityServer4.Models;
 using LinqToDB.Mapping;
-using static IdentityServer4.IdentityServerConstants;
 
-namespace IdentityServer4.EntityFramework.Entities
+namespace IdentityServer4.LinqToDB.Entities
 {
     public class Client
     {
 		[PrimaryKey, Identity]
         public int Id { get; set; }
         public string ClientId { get; set; }
-        public string ProtocolType { get; set; } = ProtocolTypes.OpenIdConnect;
+        public string ProtocolType { get; set; } = IdentityServerConstants.ProtocolTypes.OpenIdConnect;
         public string ClientName { get; set; }
         public bool Enabled { get; set; } = true;
 		[Association(ThisKey = nameof(Id), OtherKey = nameof(ClientSecret.ClientId))]

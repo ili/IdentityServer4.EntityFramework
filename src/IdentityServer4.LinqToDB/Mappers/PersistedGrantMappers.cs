@@ -5,7 +5,7 @@
 using AutoMapper;
 using IdentityServer4.Models;
 
-namespace IdentityServer4.EntityFramework.Mappers
+namespace IdentityServer4.LinqToDB.Mappers
 {
     public static class PersistedGrantMappers
     {

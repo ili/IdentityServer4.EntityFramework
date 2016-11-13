@@ -4,14 +4,12 @@
 
 using System;
 using System.Linq;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.LinqToDB.Entities;
 using LinqToDB;
 using LinqToDB.Data;
 using Xunit;
 
-namespace IdentityServer4.EntityFramework.IntegrationTests.DbContexts
+namespace IdentityServer4.LinqToDB.IntegrationTests.DbContexts
 {
 	public class ClientDbContextTests : IClassFixture<DatabaseProviderFixture>
 	{

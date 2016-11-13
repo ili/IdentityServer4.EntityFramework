@@ -4,14 +4,13 @@
 
 using System;
 using System.Collections.Generic;
-using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Services;
+using IdentityServer4.LinqToDB.Mappers;
+using IdentityServer4.LinqToDB.Services;
 using IdentityServer4.Models;
-using Xunit;
-using IdentityServer4.EntityFramework.Interfaces;
 using LinqToDB;
+using Xunit;
 
-namespace IdentityServer4.EntityFramework.IntegrationTests.Services
+namespace IdentityServer4.LinqToDB.IntegrationTests.Services
 {
 	public class CorsPolicyServiceTests : IClassFixture<DatabaseProviderFixture>
 	{

@@ -5,14 +5,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Stores;
+using IdentityServer4.LinqToDB.Mappers;
+using IdentityServer4.LinqToDB.Stores;
 using IdentityServer4.Models;
 using LinqToDB;
 using Xunit;
 
-namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
+namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 {
 	public class ScopeStoreTests : IClassFixture<DatabaseProviderFixture>
 	{
@@ -69,7 +68,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			var db = _fixture.Factory.GetContext();
 
 			db.Insert(CreateTestObject().ToEntity());
-			db.Insert(new Entities.Scope {Name = "hidden_scope_return", ShowInDiscoveryDocument = false});
+			db.Insert(new LinqToDB.Entities.Scope {Name = "hidden_scope_return", ShowInDiscoveryDocument = false});
 
 			IList<Scope> scopes;
 			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());
@@ -87,7 +86,7 @@ namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
 			var db = _fixture.Factory.GetContext();
 
 			db.Insert(CreateTestObject().ToEntity());
-			db.Insert(new Entities.Scope {Name = "hidden_scope", ShowInDiscoveryDocument = false});
+			db.Insert(new LinqToDB.Entities.Scope {Name = "hidden_scope", ShowInDiscoveryDocument = false});
 
 			IList<Scope> scopes;
 			var store = new ScopeStore(_fixture.Factory, FakeLogger<ScopeStore>.Create());

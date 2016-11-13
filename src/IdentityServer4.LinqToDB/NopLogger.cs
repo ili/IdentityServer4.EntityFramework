@@ -2,10 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using Microsoft.Extensions.Logging;
 using System;
+using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.EntityFramework
+namespace IdentityServer4.LinqToDB
 {
     class NopLogger : ILogger, IDisposable
     {

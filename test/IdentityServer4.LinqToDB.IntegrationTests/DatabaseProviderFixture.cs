@@ -3,15 +3,13 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Interfaces;
+using IdentityServer4.LinqToDB.Entities;
+using IdentityServer4.LinqToDB.Interfaces;
 using LinqToDB;
 using LinqToDB.Data;
 using Microsoft.Data.Sqlite;
 
-namespace IdentityServer4.EntityFramework.IntegrationTests
+namespace IdentityServer4.LinqToDB.IntegrationTests
 {
     /// <summary>
     /// xUnit ClassFixture for creating and deleting integration test databases.
@@ -33,12 +31,12 @@ namespace IdentityServer4.EntityFramework.IntegrationTests
 
 			public DataContext GetContext()
 		    {
-			    return new DataContext(LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
+			    return new DataContext(global::LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
 		    }
 
 		    public DataConnection GetConnection()
 		    {
-				return new DataConnection(LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
+				return new DataConnection(global::LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
 			}
 		}
 
@@ -50,14 +48,14 @@ namespace IdentityServer4.EntityFramework.IntegrationTests
 		public DatabaseProviderFixture()
 		{
 			_connectionString = GetConnectionString();
-		    LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
+			global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
 			Factory = new InMemoryFactory(_connectionString);
 
 
 			_connection = new SqliteConnection(_connectionString);
 			_connection.Open();
 
-			var db = new DataConnection(LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
+			var db = new DataConnection(global::LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
 			db.CreateTable<Client>();
 			db.CreateTable<ClientClaim>();
 			db.CreateTable<ClientCorsOrigin>();

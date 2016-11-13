@@ -6,14 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.LinqToDB.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.EntityFramework.Stores
+namespace IdentityServer4.LinqToDB.Stores
 {
 	public class ScopeStore : IScopeStore
 	{
@@ -30,11 +30,11 @@ namespace IdentityServer4.EntityFramework.Stores
 
 		public Task<IEnumerable<Scope>> FindScopesAsync(IEnumerable<string> scopeNames)
 		{
-			var oldValue = LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
+			var oldValue = global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
 
 			try
 			{
-				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
+				global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
 
 				var scopes = _dataConnectionFactory.GetContext()
 					.GetTable<Entities.Scope>()
@@ -52,17 +52,17 @@ namespace IdentityServer4.EntityFramework.Stores
 			}
 			finally
 			{
-				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
+				global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
 			}
 		}
 
 		public Task<IEnumerable<Scope>> GetScopesAsync(bool publicOnly = true)
 		{
-			var oldValue = LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
+			var oldValue = global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery;
 
 			try
 			{
-				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
+				global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
 				IQueryable<Entities.Scope> scopes = _dataConnectionFactory.GetContext()
 					.GetTable<Entities.Scope>()
 					.LoadWith(x => x.Claims)
@@ -81,7 +81,7 @@ namespace IdentityServer4.EntityFramework.Stores
 			}
 			finally
 			{
-				LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
+				global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = oldValue;
 			}
 		}
 	}

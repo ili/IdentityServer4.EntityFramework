@@ -4,9 +4,8 @@
 
 using System;
 using LinqToDB.Mapping;
-using static IdentityServer4.IdentityServerConstants;
 
-namespace IdentityServer4.EntityFramework.Entities
+namespace IdentityServer4.LinqToDB.Entities
 {
     public class ClientSecret
     {
@@ -15,7 +14,7 @@ namespace IdentityServer4.EntityFramework.Entities
         public string Description { get; set; }
         public string Value { get; set; }
         public DateTime? Expiration { get; set; }
-        public string Type { get; set; } = SecretTypes.SharedSecret;
+        public string Type { get; set; } = IdentityServerConstants.SecretTypes.SharedSecret;
         public int ClientId { get; set; }
     }
 }

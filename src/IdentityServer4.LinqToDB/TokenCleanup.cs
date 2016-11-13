@@ -6,13 +6,13 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Options;
+using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.LinqToDB.Options;
 using LinqToDB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.EntityFramework
+namespace IdentityServer4.LinqToDB
 {
     internal class TokenCleanup
     {

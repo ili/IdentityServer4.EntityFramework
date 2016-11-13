@@ -6,14 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.LinqToDB.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.EntityFramework.Stores
+namespace IdentityServer4.LinqToDB.Stores
 {
     public class PersistedGrantStore : IPersistedGrantStore
     {

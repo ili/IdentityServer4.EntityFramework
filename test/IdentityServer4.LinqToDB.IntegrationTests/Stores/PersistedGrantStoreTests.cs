@@ -4,15 +4,14 @@
 
 using System;
 using System.Linq;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Stores;
+using IdentityServer4.LinqToDB.Mappers;
+using IdentityServer4.LinqToDB.Stores;
 using IdentityServer4.Models;
 using LinqToDB;
-using Xunit;
 using LinqToDB.Data;
+using Xunit;
 
-namespace IdentityServer4.EntityFramework.IntegrationTests.Stores
+namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 {
 	public class PersistedGrantStoreTests : IClassFixture<DatabaseProviderFixture>
 	{

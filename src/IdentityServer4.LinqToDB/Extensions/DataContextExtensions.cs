@@ -1,4 +1,4 @@
-﻿using IdentityServer4.EntityFramework.Entities;
+﻿using IdentityServer4.LinqToDB.Entities;
 
 // ReSharper disable once CheckNamespace
 namespace LinqToDB.Data

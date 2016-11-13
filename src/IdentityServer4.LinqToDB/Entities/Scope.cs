@@ -2,11 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer4.Models;
 using System.Collections.Generic;
+using IdentityServer4.Models;
 using LinqToDB.Mapping;
 
-namespace IdentityServer4.EntityFramework.Entities
+namespace IdentityServer4.LinqToDB.Entities
 {
     public class Scope
     {

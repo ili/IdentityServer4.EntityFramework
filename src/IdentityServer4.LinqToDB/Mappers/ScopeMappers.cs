@@ -3,9 +3,9 @@
 
 
 using AutoMapper;
-using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.LinqToDB.Entities;
 
-namespace IdentityServer4.EntityFramework.Mappers
+namespace IdentityServer4.LinqToDB.Mappers
 {
     public static class ScopeMappers
     {

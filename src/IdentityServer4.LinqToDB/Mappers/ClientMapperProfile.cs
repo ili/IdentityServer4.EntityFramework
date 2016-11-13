@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using AutoMapper;
-using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.LinqToDB.Entities;
 
-namespace IdentityServer4.EntityFramework.Mappers
+namespace IdentityServer4.LinqToDB.Mappers
 {
     /// <summary>
     /// AutoMapper configuration for Client

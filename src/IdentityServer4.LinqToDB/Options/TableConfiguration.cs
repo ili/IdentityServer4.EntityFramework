@@ -1,4 +1,4 @@
-﻿namespace IdentityServer4.EntityFramework.Options
+﻿namespace IdentityServer4.LinqToDB.Options
 {
     public class TableConfiguration
     {

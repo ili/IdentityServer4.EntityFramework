@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace IdentityServer4.EntityFramework.Mappers
+namespace IdentityServer4.LinqToDB.Mappers
 {
     /// <summary>
     /// AutoMapper Config for PersistedGrant
