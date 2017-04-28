@@ -134,21 +134,16 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 				Scopes = new List<Scope> { new Scope { Name = Guid.NewGuid().ToString(), ShowInDiscoveryDocument = false } }
 			};
 
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
+			using (var db = _fixture.Factory.GetConnection())
 			{
-				context.IdentityResources.Add(visibleIdentityResource.ToEntity());
-				context.ApiResources.Add(visibleApiResource.ToEntity());
-				context.IdentityResources.Add(hiddenIdentityResource.ToEntity());
-				context.ApiResources.Add(hiddenApiResource.ToEntity());
-				context.SaveChanges();
+				db.Insert(visibleIdentityResource);
+				db.Insert(visibleApiResource);
+				db.Insert(hiddenIdentityResource);
+				db.Insert(hiddenApiResource);
 			}
 
-			Resources resources;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
-				resources = store.GetAllResources().Result;
-			}
+			var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
+				var resources = store.GetAllResources().Result;
 
 			Assert.NotNull(resources);
 			Assert.NotEmpty(resources.IdentityResources);
@@ -163,21 +158,14 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		{
 			var resource = CreateIdentityTestResource();
 
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				context.IdentityResources.Add(resource.ToEntity());
-				context.SaveChanges();
-			}
+			_fixture.Factory.GetContext().Insert(resource);
 
 			IList<IdentityResource> resources;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
+				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
 				resources = store.FindIdentityResourcesByScopeAsync(new List<string>
 				{
 					resource.Name
 				}).Result.ToList();
-			}
 
 			Assert.NotNull(resources);
 			Assert.NotEmpty(resources);
@@ -193,22 +181,18 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		{
 			var resource = CreateIdentityTestResource();
 
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
+			using (var db = _fixture.Factory.GetConnection())
 			{
-				context.IdentityResources.Add(resource.ToEntity());
-				context.IdentityResources.Add(CreateIdentityTestResource().ToEntity());
-				context.SaveChanges();
+				db.Insert(resource);
+				db.Insert(CreateIdentityTestResource());
 			}
 
 			IList<IdentityResource> resources;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
+				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
 				resources = store.FindIdentityResourcesByScopeAsync(new List<string>
 				{
 					resource.Name
 				}).Result.ToList();
-			}
 
 			Assert.NotNull(resources);
 			Assert.NotEmpty(resources);
@@ -220,18 +204,12 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		{
 			var resource = CreateApiTestResource();
 
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				context.ApiResources.Add(resource.ToEntity());
-				context.SaveChanges();
-			}
+			_fixture.Factory.GetContext().Insert(resource);
 
 			ApiResource foundResource;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
+				var store = new ResourceStore(_fixture.Factory
+					, FakeLogger<ResourceStore>.Create());
 				foundResource = store.FindApiResourceAsync(resource.Name).Result;
-			}
 
 			Assert.NotNull(foundResource);
 
@@ -248,19 +226,11 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		public void FindApiResourcesByScopeAsync_WhenResourceExists_ExpectResourceAndCollectionsReturned()
 		{
 			var resource = CreateApiTestResource();
-
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				context.ApiResources.Add(resource.ToEntity());
-				context.SaveChanges();
-			}
+			_fixture.Factory.GetContext().Insert(resource);
 
 			IList<ApiResource> resources;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
+				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
 				resources = store.FindApiResourcesByScopeAsync(new List<string> { resource.Scopes.First().Name }).Result.ToList();
-			}
 
 			Assert.NotEmpty(resources);
 			Assert.NotNull(resources);
@@ -279,20 +249,16 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		{
 			var resource = CreateApiTestResource();
 
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
+			using (var db = _fixture.Factory.GetConnection())
 			{
-				context.ApiResources.Add(resource.ToEntity());
-				context.ApiResources.Add(CreateApiTestResource().ToEntity());
-				context.ApiResources.Add(CreateApiTestResource().ToEntity());
-				context.SaveChanges();
+				db.Insert(resource);
+				db.Insert(CreateApiTestResource());
+				db.Insert(CreateApiTestResource());
 			}
 
 			IList<ApiResource> resources;
-			using (var context = new ConfigurationDbContext(options, StoreOptions))
-			{
-				var store = new ResourceStore(context, FakeLogger<ResourceStore>.Create());
+				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
 				resources = store.FindApiResourcesByScopeAsync(new List<string> { resource.Scopes.First().Name }).Result.ToList();
-			}
 
 			Assert.NotNull(resources);
 			Assert.NotEmpty(resources);

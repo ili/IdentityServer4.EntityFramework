@@ -8,6 +8,7 @@ using IdentityServer4.LinqToDB.Interfaces;
 using LinqToDB;
 using LinqToDB.Data;
 using Microsoft.Data.Sqlite;
+using Client = IdentityServer4.LinqToDB.Entities.Client;
 
 namespace IdentityServer4.LinqToDB.IntegrationTests
 {
@@ -56,6 +57,11 @@ namespace IdentityServer4.LinqToDB.IntegrationTests
 			_connection.Open();
 
 			var db = new DataConnection(global::LinqToDB.DataProvider.SQLite.SQLiteTools.GetDataProvider(), _connectionString);
+			db.CreateTable<ApiResource>();
+			db.CreateTable<ApiResourceClaim>();
+			db.CreateTable<ApiScope>();
+			db.CreateTable<ApiScopeClaim>();
+			db.CreateTable<ApiSecret>();
 			db.CreateTable<Client>();
 			db.CreateTable<ClientClaim>();
 			db.CreateTable<ClientCorsOrigin>();
@@ -65,10 +71,9 @@ namespace IdentityServer4.LinqToDB.IntegrationTests
 			db.CreateTable<ClientRedirectUri>();
 			db.CreateTable<ClientScope>();
 			db.CreateTable<ClientSecret>();
-			db.CreateTable<PersistedGrant>();
-			db.CreateTable<Scope>();
-			db.CreateTable<ScopeClaim>();
-			db.CreateTable<ScopeSecret>();
+			db.CreateTable<Models.PersistedGrant>();
+			db.CreateTable<IdentityClaim>();
+			db.CreateTable<IdentityResource>();
 		}
 
 		public void Dispose()
