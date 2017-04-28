@@ -6,11 +6,13 @@ using LinqToDB.Mapping;
 
 namespace IdentityServer4.LinqToDB.Entities
 {
-    public class ClientScope
-    {
-		[PrimaryKey, Identity]
-        public int Id { get; set; }
-        public string Scope { get; set; }
-        public int ClientId { get; set; }
-    }
+	public class ClientScope
+	{
+		[PrimaryKey]
+		[Identity]
+		public int Id { get; set; }
+
+		public string Scope { get; set; }
+		public string ClientId { get; set; }
+	}
 }

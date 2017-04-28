@@ -7,28 +7,29 @@ using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.LinqToDB
 {
-    class NopLogger : ILogger, IDisposable
-    {
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return this;
-        }
+	internal class NopLogger : ILogger, IDisposable
+	{
+		public void Dispose()
+		{
+		}
 
-        public void Dispose()
-        {
-        }
+		public IDisposable BeginScope<TState>(TState state)
+		{
+			return this;
+		}
 
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return false;
-        }
+		public bool IsEnabled(LogLevel logLevel)
+		{
+			return false;
+		}
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-        }
-    }
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
+			Func<TState, Exception, string> formatter)
+		{
+		}
+	}
 
-    class NopLogger<T> : NopLogger, ILogger<T>
-    {
-    }
+	internal class NopLogger<T> : NopLogger, ILogger<T>
+	{
+	}
 }

@@ -16,10 +16,20 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.6|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.6|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="IdentityServer4" Version="1.0.0-rc3" />
-    <PackageReference Include="linq2db.core" Version="1.7.5-*" />
-    <PackageReference Include="AutoMapper" Version="5.1.1" />
+    <PackageReference Include="IdentityServer4" Version="1.5.0" />
+    <PackageReference Include="linq2db.core" Version="1.7.6" />
+    <PackageReference Include="AutoMapper" Version="6.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">

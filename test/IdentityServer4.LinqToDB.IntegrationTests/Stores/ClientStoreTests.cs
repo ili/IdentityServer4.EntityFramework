@@ -4,7 +4,6 @@
 
 using System;
 using System.Linq;
-using IdentityServer4.LinqToDB.Mappers;
 using IdentityServer4.LinqToDB.Stores;
 using IdentityServer4.Models;
 using LinqToDB;
@@ -25,16 +24,16 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		public void FindClientByIdAsync_WhenClientExists_ExpectClientRetured()
 		{
 			var db = _fixture.Factory.GetContext();
-			var testClient = new Client
+			var testClient = new Entities.Client
 			{
 				ClientId = Guid.NewGuid().ToString(),
 				ClientName = "Test Client",
-			}.ToEntity();
+			};
 
-			var id = Convert.ToInt32(db.InsertWithIdentity(testClient));
+			db.Insert(testClient);
 			var agt = testClient.AllowedGrantTypes.First();
-			agt.ClientId = id;
-			db.Insert(agt);
+
+			db.Insert(new Entities.ClientGrantType(){ClientId = testClient.ClientId, GrantType = agt});
 
 			var store = new ClientStore(_fixture.Factory, FakeLogger<ClientStore>.Create());
 			var client = store.FindClientByIdAsync(testClient.ClientId).Result;
