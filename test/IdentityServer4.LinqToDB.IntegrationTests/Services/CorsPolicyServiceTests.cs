@@ -46,8 +46,8 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Services
 			};
 
 			db.Insert(entity2);
-			db.Insert(new ClientCorsOrigin { ClientId = entity2.ClientId, Origin = entity.AllowedCorsOrigins.First() });
-			db.Insert(new ClientCorsOrigin { ClientId = entity2.ClientId, Origin = entity.AllowedCorsOrigins.Skip(1).First() });
+			db.Insert(new ClientCorsOrigin { ClientId = entity2.ClientId, Origin = entity2.AllowedCorsOrigins.First() });
+			db.Insert(new ClientCorsOrigin { ClientId = entity2.ClientId, Origin = entity2.AllowedCorsOrigins.Skip(1).First() });
 
 			var service = new CorsPolicyService(_fixture.Factory, FakeLogger<CorsPolicyService>.Create());
 			var result = service.IsOriginAllowedAsync(testCorsOrigin).Result;

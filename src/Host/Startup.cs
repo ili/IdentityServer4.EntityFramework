@@ -5,9 +5,6 @@
 using System.Linq;
 using System.Reflection;
 using Host.Configuration;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -17,19 +14,25 @@ using Serilog;
 using IdentityServer4.Validation;
 using IdentityServer4.Quickstart.UI;
 using System;
+using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.LinqToDB;
+using IdentityServer4.LinqToDB.Entities;
+using LinqToDB;
+using LinqToDB.Data;
 using Serilog.Events;
 
 namespace Host
 {
-    public class Startup
+	public class Startup
     {
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            const string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;database=IdentityServer4.EntityFramework;trusted_connection=yes;";
-            
             services.AddMvc();
 
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
+	        // Linq To DB specific
+			var factory = new DataConnectionFactory();
 
             services.AddIdentityServer()
                 .AddTemporarySigningCredential()
@@ -37,13 +40,9 @@ namespace Host
                 .AddSecretValidator<PrivateKeyJwtSecretValidator>()
                 .AddTestUsers(TestUsers.Users)
 
-                .AddConfigurationStore(builder =>
-                    builder.UseSqlServer(connectionString,
-                        options => options.MigrationsAssembly(migrationsAssembly)))
-
-                .AddOperationalStore(builder =>
-                    builder.UseSqlServer(connectionString,
-                        options => options.MigrationsAssembly(migrationsAssembly)));
+				// Linq To DB specific
+                .AddConfigurationStore(factory)
+                .AddOperationalStore(factory);
 
             return services.BuildServiceProvider(validateScopes: true);
         }
@@ -74,9 +73,7 @@ namespace Host
             // Setup Databases
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                serviceScope.ServiceProvider.GetService<ConfigurationDbContext>().Database.Migrate();
-                serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>().Database.Migrate();
-                EnsureSeedData(serviceScope.ServiceProvider.GetService<ConfigurationDbContext>());
+                EnsureSeedData(serviceScope.ServiceProvider.GetService<IDataConnectionFactory>());
             }
 
             app.UseIdentityServer();
@@ -86,34 +83,37 @@ namespace Host
             app.UseMvcWithDefaultRoute();
         }
 
-        private static void EnsureSeedData(ConfigurationDbContext context)
+        private static void EnsureSeedData(IDataConnectionFactory context)
         {
-            if (!context.Clients.Any())
-            {
-                foreach (var client in Clients.Get().ToList())
-                {
-                    context.Clients.Add(client.ToEntity());
-                }
-                context.SaveChanges();
-            }
+	        using (var db = context.GetConnection())
+	        {
+		        db.CreateTable<ApiResource>();
+		        db.CreateTable<ApiResourceClaim>();
+		        db.CreateTable < ApiScope> ();
+		        db.CreateTable < ApiScopeClaim> ();
+		        db.CreateTable < ApiSecret> ();
+		        db.CreateTable < Client> ();
+		        db.CreateTable < ClientClaim> ();
+		        db.CreateTable < ClientCorsOrigin> ();
+		        db.CreateTable < ClientGrantType> ();
+		        db.CreateTable < ClientIdentityProviderRestrictions> ();
+		        db.CreateTable < ClientPostLogoutRedirectUri> ();
+		        db.CreateTable < ClientRedirectUri> ();
+		        db.CreateTable < ClientScope> ();
+		        db.CreateTable < ClientSecret> ();
+		        db.CreateTable < IdentityClaim> ();
+		        db.CreateTable < IdentityResource> ();
+		        db.CreateTable < Secret> ();
 
-            if (!context.IdentityResources.Any())
-            {
-                foreach (var resource in Resources.GetIdentityResources().ToList())
-                {
-                    context.IdentityResources.Add(resource.ToEntity());
-                }
-                context.SaveChanges();
-            }
 
-            if (!context.ApiResources.Any())
-            {
-                foreach (var resource in Resources.GetApiResources().ToList())
-                {
-                    context.ApiResources.Add(resource.ToEntity());
-                }
-                context.SaveChanges();
-            }
+		        foreach (var client in Clients.Get())
+		        {
+			        db.ComplexInsert(client);
+		        }
+
+		        db.BulkCopy(Resources.GetIdentityResources());
+		        db.BulkCopy(Resources.GetApiResources().ToList());
+	        }
         }
     }
 }

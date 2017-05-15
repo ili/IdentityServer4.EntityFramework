@@ -11,6 +11,7 @@ using LinqToDB;
 using Xunit;
 using IdentityModel;
 using IdentityServer4.Stores;
+using LinqToDB.Data;
 
 namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 {
@@ -39,9 +40,9 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 			};
 		}
 
-		private static ApiResource CreateApiTestResource()
+		private static Entities.ApiResource CreateApiTestResource()
 		{
-			return new ApiResource()
+			return new Entities.ApiResource()
 			{
 				Name = Guid.NewGuid().ToString(),
 				ApiSecrets = new List<Secret> { new Secret("secret".Sha256()) },
@@ -69,8 +70,8 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 			var testApiResource = CreateApiTestResource();
 			using (var db = _fixture.Factory.GetConnection())
 			{
-				db.Insert(testIdentityResource);
-				db.Insert(testApiResource);
+				db.ComplexInsert(testIdentityResource);
+				db.ComplexInsert(testApiResource);
 
 				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
 
@@ -98,10 +99,10 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 			var testApiResource = CreateApiTestResource();
 			using (var db = _fixture.Factory.GetConnection())
 			{
-				db.Insert(testIdentityResource);
-				db.Insert(testApiResource);
-				db.Insert(CreateIdentityTestResource());
-				db.Insert(CreateApiTestResource());
+				db.ComplexInsert(testIdentityResource);
+				db.ComplexInsert(testApiResource);
+				db.ComplexInsert(CreateIdentityTestResource());
+				db.ComplexInsert(CreateApiTestResource());
 
 				Resources resources;
 				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
@@ -136,10 +137,10 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 
 			using (var db = _fixture.Factory.GetConnection())
 			{
-				db.Insert(visibleIdentityResource);
-				db.Insert(visibleApiResource);
-				db.Insert(hiddenIdentityResource);
-				db.Insert(hiddenApiResource);
+				db.ComplexInsert(visibleIdentityResource);
+				db.ComplexInsert(visibleApiResource);
+				db.ComplexInsert(hiddenIdentityResource);
+				db.ComplexInsert(hiddenApiResource);
 			}
 
 			var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
@@ -158,14 +159,16 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		{
 			var resource = CreateIdentityTestResource();
 
-			_fixture.Factory.GetContext().Insert(resource);
+			using (var db = _fixture.Factory.GetConnection())
+				db.ComplexInsert(resource);
 
 			IList<IdentityResource> resources;
-				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
-				resources = store.FindIdentityResourcesByScopeAsync(new List<string>
+			var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
+			resources = store.FindIdentityResourcesByScopeAsync(new List<string>
 				{
 					resource.Name
-				}).Result.ToList();
+				})
+				.Result.ToList();
 
 			Assert.NotNull(resources);
 			Assert.NotEmpty(resources);
@@ -183,8 +186,8 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 
 			using (var db = _fixture.Factory.GetConnection())
 			{
-				db.Insert(resource);
-				db.Insert(CreateIdentityTestResource());
+				db.ComplexInsert(resource);
+				db.ComplexInsert(CreateIdentityTestResource());
 			}
 
 			IList<IdentityResource> resources;
@@ -202,13 +205,15 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		[Fact]
 		public void FindApiResourceAsync_WhenResourceExists_ExpectResourceAndCollectionsReturned()
 		{
-			var resource = CreateApiTestResource();
-
-			_fixture.Factory.GetContext().Insert(resource);
-
 			ApiResource foundResource;
 				var store = new ResourceStore(_fixture.Factory
 					, FakeLogger<ResourceStore>.Create());
+
+			var resource = CreateApiTestResource();
+
+			using (var db = _fixture.Factory.GetConnection())
+				db.ComplexInsert(resource);
+
 				foundResource = store.FindApiResourceAsync(resource.Name).Result;
 
 			Assert.NotNull(foundResource);
@@ -226,7 +231,8 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 		public void FindApiResourcesByScopeAsync_WhenResourceExists_ExpectResourceAndCollectionsReturned()
 		{
 			var resource = CreateApiTestResource();
-			_fixture.Factory.GetContext().Insert(resource);
+			using (var db = _fixture.Factory.GetConnection())
+				db.ComplexInsert(resource);
 
 			IList<ApiResource> resources;
 				var store = new ResourceStore(_fixture.Factory, FakeLogger<ResourceStore>.Create());
@@ -251,9 +257,9 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 
 			using (var db = _fixture.Factory.GetConnection())
 			{
-				db.Insert(resource);
-				db.Insert(CreateApiTestResource());
-				db.Insert(CreateApiTestResource());
+				db.ComplexInsert(resource);
+				db.ComplexInsert(CreateApiTestResource());
+				db.ComplexInsert(CreateApiTestResource());
 			}
 
 			IList<ApiResource> resources;

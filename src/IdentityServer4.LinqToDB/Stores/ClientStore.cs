@@ -65,7 +65,7 @@ namespace IdentityServer4.LinqToDB.Stores
 						.Cast<Claim>()
 						.ToList();
 
-					client.IdentityProviderRestrictions = db.GetTable<ClientIdPRestriction>()
+					client.IdentityProviderRestrictions = db.GetTable<ClientIdentityProviderRestrictions>()
 						.Where(_ => _.ClientId == clientId)
 						.Select(_ => _.Provider)
 						.ToList();

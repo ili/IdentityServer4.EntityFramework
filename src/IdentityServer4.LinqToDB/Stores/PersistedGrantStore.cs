@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using IdentityServer4.LinqToDB.Interfaces;
 using IdentityServer4.Models;
@@ -15,13 +16,6 @@ namespace IdentityServer4.LinqToDB.Stores
 	{
 		private readonly IDataConnectionFactory _dataConnectionFactory;
 		private readonly ILogger _logger;
-
-		static PersistedGrantStore()
-		{
-			MappingSchema.Default.GetFluentMappingBuilder()
-				.Entity<PersistedGrant>()
-				.HasPrimaryKey(_ => _.Key);
-		}
 
 		public PersistedGrantStore(IDataConnectionFactory dataConnectionFactory, ILogger<PersistedGrantStore> logger)
 		{
@@ -39,6 +33,7 @@ namespace IdentityServer4.LinqToDB.Stores
 			catch (Exception ex)
 			{
 				_logger.LogError(0, ex, "Exception storing persisted grant");
+				throw;
 			}
 
 			return Task.FromResult(0);

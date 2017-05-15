@@ -1,16 +1,12 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityServer4.Models;
+﻿using IdentityServer4.Models;
 using LinqToDB.Mapping;
 
 namespace IdentityServer4.LinqToDB.Entities
 {
 	/// <summary>
-	/// Represents <see cref="Models.Client.AllowedScopes"/> in database
+	/// Represents <see cref="Models.Client.IdentityProviderRestrictions"/> in database
 	/// </summary>
-	public class ClientScope
+	public class ClientIdentityProviderRestrictions
 	{
 		/// <summary>
 		/// <see cref="int"/> identity field
@@ -20,10 +16,10 @@ namespace IdentityServer4.LinqToDB.Entities
 		public int Id { get; set; }
 
 		/// <summary>
-		/// Represents Scope
+		/// Represents provider restrictions
 		/// </summary>
-		public string Scope { get; set; }
-
+		public string Provider { get; set; }
+		
 		/// <summary>
 		/// <see cref="Models.Client.ClientId"/>
 		/// </summary>
