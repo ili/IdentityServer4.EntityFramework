@@ -5,84 +5,82 @@ var configuration   = Argument<string>("configuration", "Release");
 // GLOBAL VARIABLES
 ///////////////////////////////////////////////////////////////////////////////
 var isLocalBuild        = !AppVeyor.IsRunningOnAppVeyor;
-var packPath            = Directory("./src/IdentityServer4.EntityFramework");
+var packPath            = Directory("./src/IdentityServer4.LinqToDB");
 var sourcePath          = Directory("./src");
 var testsPath           = Directory("test");
 var buildArtifacts      = Directory("./artifacts/packages");
+var solutionName        = "./IdentityServer4.LinqToDB.sln";
 
 Task("Build")
-    .IsDependentOn("Clean")
-    .IsDependentOn("Restore")
-    .Does(() =>
+	.IsDependentOn("Clean")
+	.IsDependentOn("Restore")
+	.Does(() =>
 {
-	var projects = GetFiles("./**/project.json");
-
-	foreach(var project in projects)
+	var settings = new DotNetCoreBuildSettings 
 	{
-        var settings = new DotNetCoreBuildSettings 
-        {
-            Configuration = configuration
-            // Runtime = IsRunningOnWindows() ? null : "unix-x64"
-        };
+		Configuration = configuration
+		// Runtime = IsRunningOnWindows() ? null : "unix-x64"
+	};
 
-	    DotNetCoreBuild(project.GetDirectory().FullPath, settings); 
-    }
+	DotNetCoreBuild(solutionName, settings); 
 });
 
 Task("RunTests")
-    .IsDependentOn("Restore")
-    .IsDependentOn("Clean")
-    .Does(() =>
+	.IsDependentOn("Restore")
+	.IsDependentOn("Clean")
+	.Does(() =>
 {
-    var projects = GetFiles("./test/**/project.json");
+	var projects = GetFiles("./test/**/*.csproj");
 
-    foreach(var project in projects)
+	foreach(var project in projects)
 	{
-        var settings = new DotNetCoreTestSettings
-        {
-            Configuration = configuration
-        };
+		var settings = new DotNetCoreTestSettings
+		{
+			Configuration = configuration
+		};
 
-        DotNetCoreTest(project.GetDirectory().FullPath, settings);
-    }
+		Console.WriteLine(project.FullPath);
+
+		DotNetCoreTest(project.FullPath, settings);
+	}
 });
 
 Task("Pack")
-    .IsDependentOn("Restore")
-    .IsDependentOn("Clean")
-    .Does(() =>
+	.IsDependentOn("Restore")
+	.IsDependentOn("Clean")
+	.Does(() =>
 {
-    var settings = new DotNetCorePackSettings
-    {
-        Configuration = configuration,
-        OutputDirectory = buildArtifacts,
-    };
+	var settings = new DotNetCorePackSettings
+	{
+		Configuration = configuration,
+		OutputDirectory = buildArtifacts,
+		NoBuild = true,
+	};
 
-    // add build suffix for CI builds
-    if(!isLocalBuild)
-    {
-        settings.VersionSuffix = "build" + AppVeyor.Environment.Build.Number.ToString().PadLeft(5,'0');
-    }
+	// add build suffix for CI builds
+	if(!isLocalBuild && AppVeyor.Environment.Repository.Branch.ToLower() != "release")
+	{
+		settings.VersionSuffix = "rc" + AppVeyor.Environment.Build.Number.ToString();
+	}
 
-    DotNetCorePack(packPath, settings);
+	DotNetCorePack(packPath, settings);
 });
 
 Task("Clean")
-    .Does(() =>
+	.Does(() =>
 {
-    CleanDirectories(new DirectoryPath[] { buildArtifacts });
+	CleanDirectories(new DirectoryPath[] { buildArtifacts });
 });
 
 Task("Restore")
-    .Does(() =>
+	.Does(() =>
 {
-    var settings = new DotNetCoreRestoreSettings
-    {
-        Sources = new [] { "https://api.nuget.org/v3/index.json" }
-    };
+	var settings = new DotNetCoreRestoreSettings
+	{
+		//Sources = new [] { "https://api.nuget.org/v3/index.json" }
+	};
 
-    DotNetCoreRestore(sourcePath, settings);
-    DotNetCoreRestore(testsPath, settings);
+	DotNetCoreRestore(solutionName, settings);
 });
 
 Task("Default")
