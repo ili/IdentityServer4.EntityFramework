@@ -28,6 +28,10 @@ Task("Build")
 		if (AppVeyor.Environment.Repository.Branch.ToLower() != "release")
 			packageVersion = packageVersion + "-rc" + AppVeyor.Environment.Build.Number.ToString();
 
+		Console.WriteLine("Package  Version: {0}", packageVersion);
+		Console.WriteLine("Assembly Version: {0}", assemblyVersion);
+
+
 		TransformConfig("./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj", "./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj",
 		new TransformationCollection {
 			{ "Project/PropertyGroup/Version",         packageVersion },
