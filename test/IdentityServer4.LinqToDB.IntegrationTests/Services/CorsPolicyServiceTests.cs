@@ -4,9 +4,9 @@
 
 using System;
 using System.Collections.Generic;
-using IdentityServer4.LinqToDB.Mappers;
+using System.Linq;
+using IdentityServer4.LinqToDB.Entities;
 using IdentityServer4.LinqToDB.Services;
-using IdentityServer4.Models;
 using LinqToDB;
 using Xunit;
 
@@ -14,12 +14,12 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Services
 {
 	public class CorsPolicyServiceTests : IClassFixture<DatabaseProviderFixture>
 	{
-		private DatabaseProviderFixture _fixture;
-
 		public CorsPolicyServiceTests(DatabaseProviderFixture fixture)
 		{
 			_fixture = fixture;
 		}
+
+		private readonly DatabaseProviderFixture _fixture;
 
 		[Fact]
 		public void IsOriginAllowedAsync_WhenOriginIsAllowed_ExpectTrue()
@@ -32,21 +32,21 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Services
 				ClientId = Guid.NewGuid().ToString(),
 				ClientName = Guid.NewGuid().ToString(),
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
-			}.ToEntity();
+			};
 
 			db.Insert(entity);
-			db.Insert(entity.AllowedCorsOrigins[0]);
+			db.Insert(new ClientCorsOrigin {ClientId = entity.ClientId, Origin = entity.AllowedCorsOrigins.First()});
 
 			var entity2 = new Client
 			{
 				ClientId = "2",
 				ClientName = "2",
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com", testCorsOrigin}
-			}.ToEntity();
+			};
 
 			db.Insert(entity2);
-			db.Insert(entity2.AllowedCorsOrigins[0]);
-			db.Insert(entity2.AllowedCorsOrigins[1]);
+			db.Insert(new ClientCorsOrigin {ClientId = entity2.ClientId, Origin = entity2.AllowedCorsOrigins.First()});
+			db.Insert(new ClientCorsOrigin {ClientId = entity2.ClientId, Origin = entity2.AllowedCorsOrigins.Skip(1).First()});
 
 			var service = new CorsPolicyService(_fixture.Factory, FakeLogger<CorsPolicyService>.Create());
 			var result = service.IsOriginAllowedAsync(testCorsOrigin).Result;
@@ -64,7 +64,7 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Services
 				ClientId = Guid.NewGuid().ToString(),
 				ClientName = Guid.NewGuid().ToString(),
 				AllowedCorsOrigins = new List<string> {"https://www.identityserver.com"}
-			}.ToEntity());
+			});
 
 			var service = new CorsPolicyService(_fixture.Factory, FakeLogger<CorsPolicyService>.Create());
 			var result = service.IsOriginAllowedAsync("InvalidOrigin").Result;

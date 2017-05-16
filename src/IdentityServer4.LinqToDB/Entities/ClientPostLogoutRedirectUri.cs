@@ -1,16 +1,27 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using LinqToDB.Mapping;
+﻿using LinqToDB.Mapping;
 
 namespace IdentityServer4.LinqToDB.Entities
 {
-    public class ClientPostLogoutRedirectUri
-    {
-		[PrimaryKey, Identity]
-        public int Id { get; set; }
-        public string PostLogoutRedirectUri { get; set; }
-        public int ClientId { get; set; }
-    }
+	/// <summary>
+	///     Represents <see cref="Models.Client.PostLogoutRedirectUris" /> in database
+	/// </summary>
+	public class ClientPostLogoutRedirectUri
+	{
+		/// <summary>
+		///     <see cref="int" /> identity field
+		/// </summary>
+		[PrimaryKey]
+		[Identity]
+		public int Id { get; set; }
+
+		/// <summary>
+		///     Represents post logout redirect Uri
+		/// </summary>
+		public string PostLogoutRedirectUri { get; set; }
+
+		/// <summary>
+		///     <see cref="Models.Client.ClientId" />
+		/// </summary>
+		public string ClientId { get; set; }
+	}
 }

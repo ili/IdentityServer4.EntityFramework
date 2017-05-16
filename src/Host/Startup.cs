@@ -3,65 +3,73 @@
 
 
 using System;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Reflection;
 using Host.Configuration;
 using IdentityServer4.LinqToDB.Entities;
 using IdentityServer4.LinqToDB.Interfaces;
-using IdentityServer4.LinqToDB.Mappers;
+using IdentityServer4.Quickstart.UI;
+using IdentityServer4.Validation;
 using LinqToDB;
+using LinqToDB.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using LinqToDB.Data;
-using LinqToDB.DataProvider.SqlServer;
+using Serilog.Events;
 
 namespace Host
 {
 	public class Startup
 	{
-		public void ConfigureServices(IServiceCollection services)
+		public IServiceProvider ConfigureServices(IServiceCollection services)
 		{
-			const string connectionString =
-				@"Data Source=(LocalDb)\MSSQLLocalDB;database=Test.IdentityServer4.LinqToDB;trusted_connection=yes;";
-
-			DataConnection.AddConfiguration("Default", connectionString, SqlServerTools.GetDataProvider(SqlServerVersion.v2012));
-			DataConnection.DefaultConfiguration = "Default";
-
 			services.AddMvc();
 
-			var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			var factory = new DataConnectionFactory();
+			// Linq To DB specific
+			var factory = DataConnectionFactory.Instance;
 
 			services.AddIdentityServer()
 				.AddTemporarySigningCredential()
-				.AddInMemoryUsers(Users.Get())
+				.AddSecretParser<ClientAssertionSecretParser>()
+				.AddSecretValidator<PrivateKeyJwtSecretValidator>()
+				.AddTestUsers(TestUsers.Users)
+
+				// Linq To DB specific
 				.AddConfigurationStore(factory)
 				.AddOperationalStore(factory);
+
+			return services.BuildServiceProvider(true);
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime applicationLifetime,
 			ILoggerFactory loggerFactory)
 		{
-			Log.Logger = new LoggerConfiguration()
+			// serilog filter
+			Func<LogEvent, bool> serilogFilter = e =>
+			{
+				var context = e.Properties["SourceContext"].ToString();
+
+				return context.StartsWith("\"IdentityServer") ||
+				       context.StartsWith("\"IdentityModel") ||
+				       e.Level == LogEventLevel.Error ||
+				       e.Level == LogEventLevel.Fatal;
+			};
+
+			var serilog = new LoggerConfiguration()
 				.MinimumLevel.Verbose()
+				.Enrich.FromLogContext()
+				.Filter.ByIncludingOnly(serilogFilter)
+				.WriteTo.LiterateConsole(
+					outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}")
 				.WriteTo.File(@"c:\logs\IdentityServer4.EntityFramework.Host.txt")
 				.CreateLogger();
 
-			loggerFactory.AddConsole();
-			loggerFactory.AddDebug();
-			loggerFactory.AddSerilog();
-
-			//app.UseDeveloperExceptionPage();
+			loggerFactory.AddSerilog(serilog);
 
 			// Setup Databases
 			using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
 			{
-				EnsureDatabase();
 				EnsureSeedData(serviceScope.ServiceProvider.GetService<IDataConnectionFactory>());
 			}
 
@@ -72,87 +80,35 @@ namespace Host
 			app.UseMvcWithDefaultRoute();
 		}
 
-		private void EnsureDatabase()
-		{
-			var connectionString = DataConnection.GetConnectionString(DataConnection.DefaultConfiguration);
-			var csb = new SqlConnectionStringBuilder(connectionString);
-			var dbName = csb.InitialCatalog;
-			csb.InitialCatalog = "master";
-			var masterConnectionString = csb.ConnectionString;
-
-			using (var db = new DataConnection(SqlServerTools.GetDataProvider(SqlServerVersion.v2012), masterConnectionString))
-			{
-				try
-				{
-					db.Execute($"create database [{dbName}]");
-				}
-				catch
-				{
-					//
-				}
-			}
-
-			using (var db = new DataConnection())
-			{
-				TryCreateTable<Client>(db);
-				TryCreateTable<ClientClaim>(db);
-				TryCreateTable<ClientCorsOrigin>(db);
-				TryCreateTable<ClientGrantType>(db);
-				TryCreateTable<ClientIdPRestriction>(db);
-				TryCreateTable<ClientPostLogoutRedirectUri>(db);
-				TryCreateTable<ClientRedirectUri>(db);
-				TryCreateTable<ClientScope>(db);
-				TryCreateTable<ClientSecret>(db);
-				TryCreateTable<PersistedGrant>(db);
-				TryCreateTable<Scope>(db);
-				TryCreateTable<ScopeClaim>(db);
-				TryCreateTable<ScopeSecret>(db);
-			}
-
-		}
-
-		private static void TryCreateTable<T>(IDataContext db)
-		{
-			try
-			{
-				db.CreateTable<T>();
-			}
-			catch
-			{
-				//
-			}
-	    }
-
-
 		private static void EnsureSeedData(IDataConnectionFactory context)
-        {
-	        using (var db = context.GetConnection())
-	        {
-		        if (!db.Clients().Any())
-		        {
-			        var clients = Clients.Get().Select(_ => _.ToEntity());
-			        db.BulkCopy(clients);
-		        }
-
-		        if (!db.Scopes().Any())
-		        {
-			        var scopes = Scopes.Get().Select(_ => _.ToEntity());
-			        db.BulkCopy(scopes);
-		        }
-	        }
-        }
-    }
-
-	public class DataConnectionFactory : IDataConnectionFactory
-	{
-		public DataContext GetContext()
 		{
-			return new DataContext();
-		}
+			using (var db = context.GetConnection())
+			{
+				db.CreateTable<ApiResource>();
+				db.CreateTable<ApiResourceClaim>();
+				db.CreateTable<ApiScope>();
+				db.CreateTable<ApiScopeClaim>();
+				db.CreateTable<ApiSecret>();
+				db.CreateTable<Client>();
+				db.CreateTable<ClientClaim>();
+				db.CreateTable<ClientCorsOrigin>();
+				db.CreateTable<ClientGrantType>();
+				db.CreateTable<ClientIdentityProviderRestrictions>();
+				db.CreateTable<ClientPostLogoutRedirectUri>();
+				db.CreateTable<ClientRedirectUri>();
+				db.CreateTable<ClientScope>();
+				db.CreateTable<ClientSecret>();
+				db.CreateTable<IdentityClaim>();
+				db.CreateTable<IdentityResource>();
+				db.CreateTable<Secret>();
 
-		public DataConnection GetConnection()
-		{
-			return new DataConnection();
+
+				foreach (var client in Clients.Get())
+					db.ComplexInsert(client);
+
+				db.BulkCopy(Resources.GetIdentityResources());
+				db.BulkCopy(Resources.GetApiResources().ToList());
+			}
 		}
 	}
 }

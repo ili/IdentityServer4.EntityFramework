@@ -1,16 +1,27 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using LinqToDB.Mapping;
+﻿using LinqToDB.Mapping;
 
 namespace IdentityServer4.LinqToDB.Entities
 {
-    public class ClientCorsOrigin
-    {
-		[PrimaryKey, Identity]
-        public int Id { get; set; }
-        public string Origin { get; set; }
-        public int ClientId { get; set; }
-    }
+	/// <summary>
+	///     Represents <see cref="Models.Client.AllowedCorsOrigins" /> in database
+	/// </summary>
+	public class ClientCorsOrigin
+	{
+		/// <summary>
+		///     <see cref="int" /> identity field
+		/// </summary>
+		[PrimaryKey]
+		[Identity]
+		public int Id { get; set; }
+
+		/// <summary>
+		///     Origin value
+		/// </summary>
+		public string Origin { get; set; }
+
+		/// <summary>
+		///     <see cref="Models.Client.ClientId" />
+		/// </summary>
+		public string ClientId { get; set; }
+	}
 }

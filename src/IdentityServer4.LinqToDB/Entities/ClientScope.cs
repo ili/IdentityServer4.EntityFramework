@@ -6,11 +6,26 @@ using LinqToDB.Mapping;
 
 namespace IdentityServer4.LinqToDB.Entities
 {
-    public class ClientScope
-    {
-		[PrimaryKey, Identity]
-        public int Id { get; set; }
-        public string Scope { get; set; }
-        public int ClientId { get; set; }
-    }
+	/// <summary>
+	///     Represents <see cref="Models.Client.AllowedScopes" /> in database
+	/// </summary>
+	public class ClientScope
+	{
+		/// <summary>
+		///     <see cref="int" /> identity field
+		/// </summary>
+		[PrimaryKey]
+		[Identity]
+		public int Id { get; set; }
+
+		/// <summary>
+		///     Represents Scope
+		/// </summary>
+		public string Scope { get; set; }
+
+		/// <summary>
+		///     <see cref="Models.Client.ClientId" />
+		/// </summary>
+		public string ClientId { get; set; }
+	}
 }
