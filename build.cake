@@ -1,3 +1,5 @@
+#addin "MagicChunks"
+
 var target          = Argument("target", "Default");
 var configuration   = Argument<string>("configuration", "Release");
 
@@ -16,6 +18,25 @@ Task("Build")
 	.IsDependentOn("Restore")
 	.Does(() =>
 {
+
+	// Patch Version for CI builds
+	if (!isLocalBuild)
+	{
+		var packageVersion = AppVeyor.Environment.Build.Version;
+		var assemblyVersion = packageVersion + ".0";
+
+		if (AppVeyor.Environment.Repository.Branch.ToLower() != "release")
+			packageVersion = packageVersion + "-rc" + AppVeyor.Environment.Build.Number.ToString();
+
+		TransformConfig("./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj", "./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj",
+		new TransformationCollection {
+			{ "Project/PropertyGroup/Version",         packageVersion },
+			{ "Project/PropertyGroup/AssemblyVersion", assemblyVersion },
+			{ "Project/PropertyGroup/FileVersion",     assemblyVersion },
+		 });
+
+	}
+
 	var settings = new DotNetCoreBuildSettings 
 	{
 		Configuration = configuration
@@ -54,14 +75,8 @@ Task("Pack")
 	{
 		Configuration = configuration,
 		OutputDirectory = buildArtifacts,
-		NoBuild = true,
+		NoBuild = true
 	};
-
-	// add build suffix for CI builds
-	if(!isLocalBuild && AppVeyor.Environment.Repository.Branch.ToLower() != "release")
-	{
-		settings.VersionSuffix = "rc" + AppVeyor.Environment.Build.Number.ToString();
-	}
 
 	DotNetCorePack(packPath, settings);
 });

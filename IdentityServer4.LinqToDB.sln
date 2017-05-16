@@ -13,11 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.cake = build.cake
 		build.ps1 = build.ps1
 		build.sh = build.sh
-		dropdb.bat = dropdb.bat
-		migrations.bat = migrations.bat
 		NuGet.config = NuGet.config
 		README.md = README.md
-		updatedb.bat = updatedb.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.LinqToDB", "src\IdentityServer4.LinqToDB\IdentityServer4.LinqToDB.csproj", "{AB83F911-8B78-4973-A3A9-2A2D85581F25}"
