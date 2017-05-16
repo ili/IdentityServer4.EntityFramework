@@ -22,8 +22,8 @@ namespace IdentityServer4.LinqToDB.IntegrationTests
 	public class DatabaseProviderFixture : IDisposable
 	{
 		private static int Counter;
-		private readonly string _connectionString;
 		private readonly SqliteConnection _connection;
+		private readonly string _connectionString;
 
 		static DatabaseProviderFixture()
 		{
@@ -34,7 +34,6 @@ namespace IdentityServer4.LinqToDB.IntegrationTests
 		public DatabaseProviderFixture()
 		{
 			_connectionString = GetConnectionString();
-			global::LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
 			Factory = new InMemoryFactory(_connectionString);
 
 

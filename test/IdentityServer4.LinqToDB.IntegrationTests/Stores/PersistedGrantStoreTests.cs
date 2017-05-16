@@ -14,12 +14,12 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 {
 	public class PersistedGrantStoreTests : IClassFixture<DatabaseProviderFixture>
 	{
-		private DatabaseProviderFixture _fixture;
-
 		public PersistedGrantStoreTests(DatabaseProviderFixture fixture)
 		{
 			_fixture = fixture;
 		}
+
+		private readonly DatabaseProviderFixture _fixture;
 
 		private static PersistedGrant CreateTestObject()
 		{
@@ -33,19 +33,6 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 				Expiration = new DateTime(2016, 08, 31),
 				Data = Guid.NewGuid().ToString()
 			};
-		}
-
-		[Fact]
-		public void StoreAsync_WhenPersistedGrantStored_ExpectSuccess()
-		{
-			var persistedGrant = CreateTestObject();
-			var db = _fixture.Factory.GetContext();
-
-			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
-			store.StoreAsync(persistedGrant).Wait();
-
-			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
-			Assert.NotNull(foundGrant);
 		}
 
 		[Fact]
@@ -155,6 +142,19 @@ namespace IdentityServer4.LinqToDB.IntegrationTests.Stores
 			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
 			Assert.NotNull(foundGrant);
 			Assert.Equal(newDate, persistedGrant.Expiration);
+		}
+
+		[Fact]
+		public void StoreAsync_WhenPersistedGrantStored_ExpectSuccess()
+		{
+			var persistedGrant = CreateTestObject();
+			var db = _fixture.Factory.GetContext();
+
+			var store = new PersistedGrantStore(_fixture.Factory, FakeLogger<PersistedGrantStore>.Create());
+			store.StoreAsync(persistedGrant).Wait();
+
+			var foundGrant = db.PersistedGrants().FirstOrDefault(x => x.Key == persistedGrant.Key);
+			Assert.NotNull(foundGrant);
 		}
 	}
 }

@@ -50,12 +50,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
 		public static IIdentityServerBuilder AddOperationalStore(
 			this IIdentityServerBuilder builder,
-			IDataConnectionFactory dataConnectionFactory)
+			IDataConnectionFactory dataConnectionFactory,
+			Action<TokenCleanupOptions> initTokenCleanUpOptions = null)
 		{
 			builder.Services.AddSingleton(dataConnectionFactory);
 
 			builder.Services.AddTransient<IPersistedGrantStore, PersistedGrantStore>();
 
+			var tokenCleanupOptions = new TokenCleanupOptions();
+			initTokenCleanUpOptions?.Invoke(tokenCleanupOptions);
+
+			builder.Services.AddSingleton(tokenCleanupOptions);
+			builder.Services.AddSingleton<TokenCleanup>();
 
 			return builder;
 		}

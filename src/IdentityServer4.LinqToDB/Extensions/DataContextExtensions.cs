@@ -1,12 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using IdentityServer4.LinqToDB.Entities;
 using IdentityServer4.Models;
-using LinqToDB.Common;
 using ApiResource = IdentityServer4.LinqToDB.Entities.ApiResource;
 using Client = IdentityServer4.LinqToDB.Entities.Client;
 using IdentityResource = IdentityServer4.LinqToDB.Entities.IdentityResource;
-using System;
-using Microsoft.IdentityModel.Logging;
 
 // ReSharper disable once CheckNamespace
 namespace LinqToDB.Data
@@ -93,7 +91,10 @@ namespace LinqToDB.Data
 			return db.GetTable<IdentityResource>();
 		}
 
-		public static ITable<PersistedGrant> PersistedGrants(this IDataContext db) => db.GetTable<PersistedGrant>();
+		public static ITable<PersistedGrant> PersistedGrants(this IDataContext db)
+		{
+			return db.GetTable<PersistedGrant>();
+		}
 
 		public static Client ComplexInsert(this DataConnection db, IdentityServer4.Models.Client client)
 		{
@@ -110,17 +111,17 @@ namespace LinqToDB.Data
 			db.Insert(client);
 
 			db.BulkCopy(client.AllowedCorsOrigins.Select(
-				_ => new ClientCorsOrigin { ClientId = client.ClientId, Origin = _ }));
+				_ => new ClientCorsOrigin {ClientId = client.ClientId, Origin = _}));
 
 			db.BulkCopy(client.AllowedGrantTypes.Select(
-				_ => new ClientGrantType() { ClientId = client.ClientId, GrantType = _ }));
+				_ => new ClientGrantType {ClientId = client.ClientId, GrantType = _}));
 
 			db.BulkCopy(client.AllowedScopes.Select(
-				_ => new ClientScope() { ClientId = client.ClientId, Scope = _ }));
+				_ => new ClientScope {ClientId = client.ClientId, Scope = _}));
 
-			db.BulkCopy(client.Claims.Select(_ => new ClientClaim(_.Type, _.Value) { ClientId = client.ClientId }));
+			db.BulkCopy(client.Claims.Select(_ => new ClientClaim(_.Type, _.Value) {ClientId = client.ClientId}));
 
-			db.BulkCopy(client.ClientSecrets.Select(_ => new ClientSecret()
+			db.BulkCopy(client.ClientSecrets.Select(_ => new ClientSecret
 			{
 				ClientId = client.ClientId,
 				Description = _.Description,
@@ -131,14 +132,14 @@ namespace LinqToDB.Data
 
 			db.BulkCopy(
 				client.IdentityProviderRestrictions.Select(
-					_ => new ClientIdentityProviderRestrictions() { ClientId = client.ClientId, Provider = _ }));
+					_ => new ClientIdentityProviderRestrictions {ClientId = client.ClientId, Provider = _}));
 
 			db.BulkCopy(client.PostLogoutRedirectUris.Select(
-				_ => new ClientPostLogoutRedirectUri() { ClientId = client.ClientId, PostLogoutRedirectUri = _ }));
+				_ => new ClientPostLogoutRedirectUri {ClientId = client.ClientId, PostLogoutRedirectUri = _}));
 
 
 			db.BulkCopy(client.RedirectUris.Select(
-				_ => new ClientPostLogoutRedirectUri() { ClientId = client.ClientId, PostLogoutRedirectUri = _ }));
+				_ => new ClientPostLogoutRedirectUri {ClientId = client.ClientId, PostLogoutRedirectUri = _}));
 
 
 			return res;
@@ -153,7 +154,7 @@ namespace LinqToDB.Data
 
 			var id = Convert.ToInt32(db.InsertWithIdentity(res));
 
-			db.BulkCopy(resource.ApiSecrets.Select(_ => new ApiSecret()
+			db.BulkCopy(resource.ApiSecrets.Select(_ => new ApiSecret
 			{
 				ApiResourceId = id,
 				Description = _.Description,
@@ -162,7 +163,7 @@ namespace LinqToDB.Data
 				Value = _.Value
 			}));
 
-			foreach (var s in resource.Scopes.Select(_ => new ApiScope()
+			foreach (var s in resource.Scopes.Select(_ => new ApiScope
 			{
 				ApiResourceId = id,
 				Description = _.Description,
@@ -176,10 +177,10 @@ namespace LinqToDB.Data
 			{
 				var scopeId = Convert.ToInt32(db.InsertWithIdentity(s));
 
-				db.BulkCopy(s.UserClaims.Select(_ => new ApiScopeClaim() {ApiScopeId = scopeId, Type = _}));
+				db.BulkCopy(s.UserClaims.Select(_ => new ApiScopeClaim {ApiScopeId = scopeId, Type = _}));
 			}
 
-			db.BulkCopy(resource.UserClaims.Select(_ => new ApiResourceClaim() {ApiResourceId = id, Type = _}));
+			db.BulkCopy(resource.UserClaims.Select(_ => new ApiResourceClaim {ApiResourceId = id, Type = _}));
 
 			return res;
 		}
@@ -191,7 +192,7 @@ namespace LinqToDB.Data
 
 			var id = Convert.ToInt32(db.InsertWithIdentity(resource));
 
-			db.BulkCopy(resource.UserClaims.Select(_ => new IdentityClaim() {IdentityResourceId = id, Type = _}));
+			db.BulkCopy(resource.UserClaims.Select(_ => new IdentityClaim {IdentityResourceId = id, Type = _}));
 
 			return res;
 		}

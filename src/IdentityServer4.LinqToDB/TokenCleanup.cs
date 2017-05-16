@@ -17,11 +17,11 @@ namespace IdentityServer4.LinqToDB
 		private readonly IServiceProvider _serviceProvider;
 		private CancellationTokenSource _source;
 
-		public TokenCleanup(IServiceProvider serviceProvider, ILogger<TokenCleanup> logger, TimeSpan interval)
+		public TokenCleanup(IServiceProvider serviceProvider, ILogger<TokenCleanup> logger, TokenCleanupOptions options)
 		{
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-			_interval = interval;
+			_interval = options.Interval;
 		}
 
 		public void Start()

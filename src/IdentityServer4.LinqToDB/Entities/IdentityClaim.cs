@@ -1,14 +1,12 @@
-﻿using IdentityServer4.Models;
-
-namespace IdentityServer4.LinqToDB.Entities
+﻿namespace IdentityServer4.LinqToDB.Entities
 {
 	/// <summary>
-	/// Represents <see cref="Models.IdentityResource.UserClaims"/> in database
+	///     Represents <see cref="Models.IdentityResource.UserClaims" /> in database
 	/// </summary>
 	public class IdentityClaim : UserClaim
 	{
 		/// <summary>
-		/// <see cref="IdentityResource.Id"/>
+		///     <see cref="IdentityResource.Id" />
 		/// </summary>
 		public int IdentityResourceId { get; set; }
 	}
