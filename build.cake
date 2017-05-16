@@ -12,6 +12,8 @@ var sourcePath          = Directory("./src");
 var testsPath           = Directory("test");
 var buildArtifacts      = Directory("./artifacts/packages");
 var solutionName        = "./IdentityServer4.LinqToDB.sln";
+var envPackageVersion   = EnvironmentVariable("packageVersion");
+
 
 Task("Build")
 	.IsDependentOn("Clean")
@@ -20,9 +22,9 @@ Task("Build")
 {
 
 	// Patch Version for CI builds
-	if (!isLocalBuild)
+	if (!isLocalBuild || envPackageVersion != null)
 	{
-		var packageVersion = AppVeyor.Environment.Build.Version;
+		var packageVersion  = envPackageVersion;
 		var assemblyVersion = packageVersion + ".0";
 
 		if (AppVeyor.Environment.Repository.Branch.ToLower() != "release")
