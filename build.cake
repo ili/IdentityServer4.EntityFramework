@@ -12,8 +12,12 @@ var sourcePath          = Directory("./src");
 var testsPath           = Directory("test");
 var buildArtifacts      = Directory("./artifacts/packages");
 var solutionName        = "./IdentityServer4.LinqToDB.sln";
-var envPackageVersion   = EnvironmentVariable("packageVersion");
+var envPackageVersion   = EnvironmentVariable("nugetVersion");
+var argRelease          = Argument<string>("Release", null);
 
+var packageSuffix       = "";
+var packageVersion      = "";
+var fullPackageVersion  = "";
 
 Task("Build")
 	.IsDependentOn("Clean")
@@ -24,19 +28,25 @@ Task("Build")
 	// Patch Version for CI builds
 	if (!isLocalBuild || envPackageVersion != null)
 	{
-		var packageVersion  = envPackageVersion;
+		    packageVersion  = envPackageVersion;
 		var assemblyVersion = packageVersion + ".0";
 
-		if (AppVeyor.Environment.Repository.Branch.ToLower() != "release")
-			packageVersion = packageVersion + "-rc" + AppVeyor.Environment.Build.Number.ToString();
+		if (AppVeyor.Environment.Repository.Branch.ToLower() != "release" && argRelease == null)
+		{
+			packageSuffix      = "rc" + AppVeyor.Environment.Build.Number.ToString();
+			fullPackageVersion = packageVersion + "-" + packageSuffix;
+		}
 
 		Console.WriteLine("Package  Version: {0}", packageVersion);
+		Console.WriteLine("Package  Suffix : {0}", packageSuffix);
 		Console.WriteLine("Assembly Version: {0}", assemblyVersion);
 
 
 		TransformConfig("./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj", "./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj",
 		new TransformationCollection {
-			{ "Project/PropertyGroup/Version",         packageVersion },
+			{ "Project/PropertyGroup/Version",         fullPackageVersion },
+			{ "Project/PropertyGroup/VersionPrefix",   packageVersion },
+			{ "Project/PropertyGroup/VersionSuffix",   packageSuffix },
 			{ "Project/PropertyGroup/AssemblyVersion", assemblyVersion },
 			{ "Project/PropertyGroup/FileVersion",     assemblyVersion },
 		 });
@@ -81,8 +91,20 @@ Task("Pack")
 	{
 		Configuration = configuration,
 		OutputDirectory = buildArtifacts,
-		NoBuild = true
+		NoBuild = true,
+		VersionSuffix = packageSuffix
 	};
+
+/*	
+	if (!string.IsNullOrEmpty(packageVersion))
+		settings.ArgumentCustomization = b => 
+		{
+			Console.WriteLine("Package  Version: {0}", packageVersion);
+
+			b.Append(" /p:VersionSuffix=" + "rc10");
+			return b;
+		};
+*/
 
 	DotNetCorePack(packPath, settings);
 });

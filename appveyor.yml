@@ -1,9 +1,13 @@
 configuration: Release
 
-environment:
-  packageVersion: 1.0.0
+cache:
+- packages -> **\packages.config
+- '%USERPROFILE%\.nuget\packages -> **\project.json'
 
-version: $(packageVersion).{build}
+environment:
+  nugetVersion: 1.0.0
+
+version: $(nugetVersion).{build}
 
 build_script:
 - ps: .\build.ps1
