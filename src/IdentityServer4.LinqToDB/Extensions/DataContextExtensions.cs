@@ -139,7 +139,7 @@ namespace LinqToDB.Data
 
 
 			db.BulkCopy(client.RedirectUris.Select(
-				_ => new ClientPostLogoutRedirectUri {ClientId = client.ClientId, PostLogoutRedirectUri = _}));
+				_ => new ClientRedirectUri() {ClientId = client.ClientId, RedirectUri = _}));
 
 
 			return res;
