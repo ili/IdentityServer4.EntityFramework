@@ -5,7 +5,7 @@ cache:
 - '%USERPROFILE%\.nuget\packages -> **\project.json'
 
 environment:
-  nugetVersion: 1.0.0
+  nugetVersion: 1.0.1
 
 version: $(nugetVersion).{build}
 
@@ -38,4 +38,4 @@ deploy:
 #---------------------------------#
 skip_commits:
   # Regex for matching commit message
-  message: /docs.*/
+  message: /ci skip/
