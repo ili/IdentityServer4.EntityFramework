@@ -30,7 +30,7 @@
 
 	<ItemGroup>
     <PackageReference Include="IdentityServer4" Version="1.5.2" />
-    <PackageReference Include="linq2db.core" Version="1.8.3" />
+    <PackageReference Include="linq2db.core" Version="1.9.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />

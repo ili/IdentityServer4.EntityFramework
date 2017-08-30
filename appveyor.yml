@@ -5,7 +5,7 @@ cache:
 - '%USERPROFILE%\.nuget\packages -> **\project.json'
 
 environment:
-  nugetVersion: 1.0.1
+  nugetVersion: 1.0.2
 
 version: $(nugetVersion).{build}
 
