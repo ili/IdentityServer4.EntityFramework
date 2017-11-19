@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using IdentityServer4.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Entities;
 using IdentityServer4.Models;
-using ApiResource = IdentityServer4.LinqToDB.Entities.ApiResource;
-using Client = IdentityServer4.LinqToDB.Entities.Client;
-using IdentityResource = IdentityServer4.LinqToDB.Entities.IdentityResource;
+using ApiResource = IdentityServer4.Contrib.LinqToDB.Entities.ApiResource;
+using Client = IdentityServer4.Contrib.LinqToDB.Entities.Client;
+using IdentityResource = IdentityServer4.Contrib.LinqToDB.Entities.IdentityResource;
 
 // ReSharper disable once CheckNamespace
 namespace LinqToDB.Data

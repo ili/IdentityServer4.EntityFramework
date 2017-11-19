@@ -4,7 +4,7 @@
 
 using System.Linq;
 using AutoMapper;
-using IdentityServer4.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Entities;
 
 namespace IdentityServer4.LinqToDB.Mappers
 {

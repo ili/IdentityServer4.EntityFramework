@@ -5,8 +5,8 @@
 using System;
 using System.Linq;
 using Host.Configuration;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Quickstart.UI;
 using IdentityServer4.Validation;
 using LinqToDB;

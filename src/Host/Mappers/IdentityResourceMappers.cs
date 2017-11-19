@@ -17,14 +17,14 @@ namespace IdentityServer4.LinqToDB.Mappers
 
 		internal static IMapper Mapper { get; }
 
-		public static IdentityResource ToModel(this Entities.IdentityResource resource)
+		public static IdentityResource ToModel(this Contrib.LinqToDB.Entities.IdentityResource resource)
 		{
 			return resource == null ? null : Mapper.Map<IdentityResource>(resource);
 		}
 
-		public static Entities.IdentityResource ToEntity(this IdentityResource resource)
+		public static Contrib.LinqToDB.Entities.IdentityResource ToEntity(this IdentityResource resource)
 		{
-			return resource == null ? null : Mapper.Map<Entities.IdentityResource>(resource);
+			return resource == null ? null : Mapper.Map<Contrib.LinqToDB.Entities.IdentityResource>(resource);
 		}
 	}
 }

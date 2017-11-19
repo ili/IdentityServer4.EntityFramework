@@ -7,10 +7,10 @@ using IdentityServer4.Models;
 using LinqToDB.Extensions;
 using LinqToDB.Mapping;
 
-namespace IdentityServer4.LinqToDB.Entities
+namespace IdentityServer4.Contrib.LinqToDB.Entities
 {
 	/// <summary>
-	///     This class contains <see cref="MappingSchema" /> extensions for <see cref="IdentityServer4.LinqToDB.Entities" />
+	///     This class contains <see cref="MappingSchema" /> extensions for <see cref="IdentityServer4.Contrib.LinqToDB.Entities" />
 	///     namespace
 	/// </summary>
 	public static class MappingExtensions

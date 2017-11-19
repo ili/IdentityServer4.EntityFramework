@@ -3,10 +3,10 @@
 
 
 using System;
-using IdentityServer4.LinqToDB;
-using IdentityServer4.LinqToDB.Interfaces;
-using IdentityServer4.LinqToDB.Services;
-using IdentityServer4.LinqToDB.Stores;
+using IdentityServer4.Contrib.LinqToDB;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Services;
+using IdentityServer4.Contrib.LinqToDB.Stores;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Builder;

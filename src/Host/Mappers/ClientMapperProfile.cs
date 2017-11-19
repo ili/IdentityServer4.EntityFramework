@@ -5,7 +5,7 @@
 using System.Linq;
 using System.Security.Claims;
 using AutoMapper;
-using IdentityServer4.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Entities;
 using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer4.LinqToDB.Mappers

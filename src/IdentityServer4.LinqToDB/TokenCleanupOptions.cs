@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IdentityServer4.LinqToDB
+namespace IdentityServer4.Contrib.LinqToDB
 {
 	public class TokenCleanupOptions
 	{

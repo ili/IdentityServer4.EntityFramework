@@ -1,4 +1,4 @@
-﻿namespace IdentityServer4.LinqToDB.Entities
+﻿namespace IdentityServer4.Contrib.LinqToDB.Entities
 {
 	/// <summary>
 	///     Represents <see cref="Models.Client" /> in database

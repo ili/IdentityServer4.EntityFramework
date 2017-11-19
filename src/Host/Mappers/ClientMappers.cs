@@ -17,14 +17,14 @@ namespace IdentityServer4.LinqToDB.Mappers
 
 		internal static IMapper Mapper { get; }
 
-		public static Client ToModel(this Entities.Client client)
+		public static Client ToModel(this Contrib.LinqToDB.Entities.Client client)
 		{
 			return Mapper.Map<Client>(client);
 		}
 
-		public static Entities.Client ToEntity(this Client client)
+		public static Contrib.LinqToDB.Entities.Client ToEntity(this Client client)
 		{
-			return Mapper.Map<Entities.Client>(client);
+			return Mapper.Map<Contrib.LinqToDB.Entities.Client>(client);
 		}
 	}
 }

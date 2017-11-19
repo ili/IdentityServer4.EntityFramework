@@ -1,5 +1,5 @@
-﻿using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+﻿using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using LinqToDB;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.SQLite;

@@ -5,8 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Services;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Services;
 using LinqToDB;
 using Xunit;
 

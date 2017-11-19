@@ -1,6 +1,6 @@
 ﻿using LinqToDB.Mapping;
 
-namespace IdentityServer4.LinqToDB.Entities
+namespace IdentityServer4.Contrib.LinqToDB.Entities
 {
 	/// <summary>
 	///     Base class for storing claims

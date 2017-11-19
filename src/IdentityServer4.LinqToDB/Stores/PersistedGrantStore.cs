@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.LinqToDB.Stores
+namespace IdentityServer4.Contrib.LinqToDB.Stores
 {
 	public class PersistedGrantStore : IPersistedGrantStore
 	{

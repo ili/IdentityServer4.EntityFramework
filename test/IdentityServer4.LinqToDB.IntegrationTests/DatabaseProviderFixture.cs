@@ -3,16 +3,16 @@
 
 
 using System;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Models;
 using LinqToDB;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.SQLite;
 using Microsoft.Data.Sqlite;
-using ApiResource = IdentityServer4.LinqToDB.Entities.ApiResource;
-using Client = IdentityServer4.LinqToDB.Entities.Client;
-using IdentityResource = IdentityServer4.LinqToDB.Entities.IdentityResource;
+using ApiResource = IdentityServer4.Contrib.LinqToDB.Entities.ApiResource;
+using Client = IdentityServer4.Contrib.LinqToDB.Entities.Client;
+using IdentityResource = IdentityServer4.Contrib.LinqToDB.Entities.IdentityResource;
 
 namespace IdentityServer4.LinqToDB.IntegrationTests
 {

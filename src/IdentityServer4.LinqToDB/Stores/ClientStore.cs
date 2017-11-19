@@ -2,15 +2,15 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Stores;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 using Client = IdentityServer4.Models.Client;
 using Secret = IdentityServer4.Models.Secret;
 
-namespace IdentityServer4.LinqToDB.Stores
+namespace IdentityServer4.Contrib.LinqToDB.Stores
 {
 	public class ClientStore : IClientStore
 	{

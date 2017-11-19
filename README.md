@@ -16,10 +16,10 @@ Project's source code is originally based on [IdentityServer4.EntityFramework](h
 ## Usage
 Install package:
 
-`PM> Install-Package IdentityServer4.LinqToDB`
+`PM> Install-Package IdentityServer4.Contrib.Linq2db`
 
 ### POCOs
-All POCOs are under `IdentityServer4.LinqToDB.Entities` namespace. Mostly POCOs are inherited from `IdentityServer4.Models.*` classes (to avoid unnesesary mapping), with adding only `Id` properties for identities and foreign keys. `IdentityServer4.Models.Client.ClientId` is used as promary key for `Client` entity. All `Id`'s are identity by default.
+All POCOs are under `IdentityServer4.Contrib.LinqToDB.Entities` namespace. Mostly POCOs are inherited from `IdentityServer4.Models.*` classes (to avoid unnesesary mapping), with adding only `Id` properties for identities and foreign keys. `IdentityServer4.Models.Client.ClientId` is used as promary key for `Client` entity. All `Id`'s are identity by default.
 
 ### Running
 Firstly you should create your connection factory as implementation of `IdentityServer4.LinqToDB.Interfaces.IDataConnectionFactory`, for example:
@@ -43,7 +43,7 @@ public IServiceProvider ConfigureServices(IServiceCollection services)
     services.AddIdentityServer() // Add IdentityServer
         .AddTemporarySigningCredential()
         // some other stuff
-	
+
         // Configure Linq To DB storage for IdentityServer
         .AddConfigurationStore(factory)
         .AddOperationalStore(factory);

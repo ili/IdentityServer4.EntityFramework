@@ -5,7 +5,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.LinqToDB
+namespace IdentityServer4.Contrib.LinqToDB
 {
 	internal class NopLogger : ILogger, IDisposable
 	{

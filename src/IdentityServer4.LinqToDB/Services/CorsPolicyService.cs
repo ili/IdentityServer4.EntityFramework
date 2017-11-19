@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Services;
 using LinqToDB;
 using Microsoft.Extensions.Logging;
 
-namespace IdentityServer4.LinqToDB.Services
+namespace IdentityServer4.Contrib.LinqToDB.Services
 {
 	public class CorsPolicyService : ICorsPolicyService
 	{

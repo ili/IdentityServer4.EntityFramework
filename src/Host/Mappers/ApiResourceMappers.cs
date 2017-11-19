@@ -4,6 +4,7 @@
 
 using AutoMapper;
 using IdentityServer4.Models;
+using IdentityServer4.Contrib.LinqToDB;
 
 namespace IdentityServer4.LinqToDB.Mappers
 {
@@ -17,14 +18,14 @@ namespace IdentityServer4.LinqToDB.Mappers
 
 		internal static IMapper Mapper { get; }
 
-		public static ApiResource ToModel(this Entities.ApiResource resource)
+		public static ApiResource ToModel(this Contrib.LinqToDB.Entities.ApiResource resource)
 		{
 			return resource == null ? null : Mapper.Map<ApiResource>(resource);
 		}
 
-		public static Entities.ApiResource ToEntity(this ApiResource resource)
+		public static Contrib.LinqToDB.Entities.ApiResource ToEntity(this ApiResource resource)
 		{
-			return resource == null ? null : Mapper.Map<Entities.ApiResource>(resource);
+			return resource == null ? null : Mapper.Map<Contrib.LinqToDB.Entities.ApiResource>(resource);
 		}
 	}
 }

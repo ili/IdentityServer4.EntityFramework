@@ -42,14 +42,16 @@ Task("Build")
 		Console.WriteLine("Assembly Version: {0}", assemblyVersion);
 
 
-		TransformConfig("./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj", "./src/IdentityServer4.LinqToDB/IdentityServer4.LinqToDB.csproj",
-		new TransformationCollection {
-			{ "Project/PropertyGroup/Version",         fullPackageVersion },
-			{ "Project/PropertyGroup/VersionPrefix",   packageVersion },
-			{ "Project/PropertyGroup/VersionSuffix",   packageSuffix },
-			{ "Project/PropertyGroup/AssemblyVersion", assemblyVersion },
-			{ "Project/PropertyGroup/FileVersion",     assemblyVersion },
-		 });
+		TransformConfig(
+					"./src/IdentityServer4.LinqToDB/IdentityServer4.Contrib.linq2db.csproj", 
+					"./src/IdentityServer4.LinqToDB/IdentityServer4.Contrib.linq2db.csproj",
+					new TransformationCollection {
+						{ "Project/PropertyGroup/Version",         fullPackageVersion },
+						{ "Project/PropertyGroup/VersionPrefix",   packageVersion },
+						{ "Project/PropertyGroup/VersionSuffix",   packageSuffix },
+						{ "Project/PropertyGroup/AssemblyVersion", assemblyVersion },
+						{ "Project/PropertyGroup/FileVersion",     assemblyVersion },
+					 });
 
 	}
 

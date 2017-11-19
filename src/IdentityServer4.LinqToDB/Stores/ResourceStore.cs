@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.LinqToDB.Entities;
-using IdentityServer4.LinqToDB.Interfaces;
+using IdentityServer4.Contrib.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Interfaces;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using LinqToDB.Data;
@@ -16,7 +16,7 @@ using ApiResource = IdentityServer4.Models.ApiResource;
 using IdentityResource = IdentityServer4.Models.IdentityResource;
 using Secret = IdentityServer4.Models.Secret;
 
-namespace IdentityServer4.LinqToDB.Stores
+namespace IdentityServer4.Contrib.LinqToDB.Stores
 {
 	public class ResourceStore : IResourceStore
 	{

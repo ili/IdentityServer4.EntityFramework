@@ -4,9 +4,9 @@
 
 using System.Linq;
 using AutoMapper;
-using IdentityServer4.LinqToDB.Entities;
+using IdentityServer4.Contrib.LinqToDB.Entities;
 using IdentityServer4.Models;
-using ApiResource = IdentityServer4.LinqToDB.Entities.ApiResource;
+using ApiResource = IdentityServer4.Contrib.LinqToDB.Entities.ApiResource;
 using Secret = IdentityServer4.Models.Secret;
 
 namespace IdentityServer4.LinqToDB.Mappers
